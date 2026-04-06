@@ -83,7 +83,7 @@ To explore heterogeneity:
 The predictive models achieved strong performance, with ROC-AUC values approaching 0.95.  
 The ROC curve below illustrates the model’s ability to distinguish between classes across different thresholds.
 
-![ROC Curve](roc-plot-504.png)
+![ROC Curve](./figures/roc-curve.png)
 
 This indicates that the model maintains high sensitivity while minimizing false positives, making it suitable for risk prediction tasks. Residual analysis suggests the model captures the overall structure of the data, although some variability remains.
 
@@ -96,7 +96,7 @@ This highlights the importance of:
 ### Clustering & Patient Stratification
 
 To explore heterogeneity in the dataset, clustering techniques were applied and visualized using PCA for dimensionality reduction.
-![Cluster Plot](cluster-plot-504.png)
+![Cluster Plot](./figures/cluster-plot.png)
 
 Both k-means and hierarchical clustering reveal meaningful structure in the data, with partially overlapping but distinct patient subgroups.
 
