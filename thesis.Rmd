@@ -1,0 +1,3237 @@
+---
+title: "Leveraging machine learning algorithms to serve Heart disease diagnosis"
+author: "Hasanain Qazzaz"
+date: "2023-08-01"
+output:
+  pdf_document:
+    latex_engine: xelatex
+    toc: no
+    toc_depth: 2
+    number_sections: yes
+  word_document:
+    toc: no
+    toc_depth: '2'
+geometry: a4paper,margin=1in
+header-includes:
+- \usepackage{dcolumn}
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead{}
+- \fancyhead[RO,LE]{\thepage}
+- \fancyhead[LO]{\leftmark}
+- \fancyfoot{}
+- \usepackage{fontspec}
+- \setmainfont{Georgia}
+- \usepackage{hyperref}
+- \hypersetup{colorlinks=true,linkcolor=blue,filecolor=magenta,urlcolor=cyan}
+- \usepackage{setspace}
+- \onehalfspacing
+- \usepackage{tocloft}
+- \renewcommand{\cftsecfont}{\normalfont\bfseries}
+- \renewcommand{\cftsecpagefont}{\normalfont\bfseries}
+- \usepackage{caption}
+- \captionsetup{font=small,labelfont=bf}
+- \usepackage{microtype}
+- \usepackage{graphicx}
+---
+
+
+\begin{center}
+\includegraphics[width=12cm]{/Users/hassanainqazzaz/Downloads/C8.png}
+\end{center}
+
+\newpage
+
+\tableofcontents 
+
+\newpage
+
+
+
+## **Abstract**
+
+This paper delves into the capabilities of machine learning algorithms with cutting-edge techniques to model and predict risk factors linked to heart disease. The main model used for prediction is logistic regression which showcased similar or better performance than more complex algorithms such as random forests and SVM. Important factors examined include sex, chestpaintype, resting ECG, the ST slope, and exercise-induced angina. According to initial research, men have a much higher susceptibility for developing heart disease, with (ASY) chest pain being a strong predictor. Many different preliminary approaches such as clustering,pre-processing, p-value adjustments and PCA were implemented to have deeper insight on the algorithms allow for their improvement. The final model showcased strong predictive power with an AUC of 0.92, with the diagnostics showing it to be a sufficient fit for the data. A portion of the results were encapsulated in an interactive easy-to-use app intended for experts and non experts alike. The main goal is to make it possible to recognize heart disease risk early, which will help to prompt timely medical interventions and ensure better patient outcomes. The study emphasizes how important it is for healthcare providers to comprehend complex risk variables and how they interact.
+
+
+
+
+
+# **Introduction**
+
+Heart disease is the term commonly utilized interchangeably with cardiovascular disease to address a range of conditions that affect the heart, most commonly addressing an inability for the heart to circulate blood properly. It is important to keep in mind that heart failure, is not a single illness, rather it is the consequence description used for multiple separate routes. Such routes are caused by cardiovascular disorders such as coronary artery disease, hypertension, and valvular heart disease (Cleveland Clinic, 2020).
+
+With 17.9 million deaths per year, or 31% of all deaths worldwide, cardiovascular diseases are the largest cause of mortality globally. Heart attacks and strokes account about 85% of these fatalities (World Health Organisation, 2021), this is further shown in (Figure 1). Heart diseases and the range of all the correlated variables, such as genetics, lifestyle, and environmental factors, are highly intricate which in turns causes diagnosis and treatment can be extremely complex. Timely and efficient tracking of heart illness as well as patient segmentation into different risk groups is ultimately necessary for the implementation of successful treatment approaches (Mensah & Brown, 2007). This paper aims to take advantage of the capabilities of machine learning and data mining methodologies in order to develop models that can facilitate medical classification of patients with respect to their features and medical status.
+
+Furthermore, to outline any underlying factors that causes the results to be as they are, and communicate them clearly. A run-of the mill approach for diagnosing heart disease usually consists of physical examination, assessment of patient history, and appropriate diagnostic tests. While this approach has been widely used to some degree, it occasionally results in delayed or incorrect diagnoses (Wijeysundera et al., 2010). On the other end of the spectrum, artificial intelligence's integration into machine learning has become a potent tool in the healthcare industry. Without being specifically coded for the goal, machine learning algorithms can learn from previous data to produce predictions or conclusions. Such algorithms have the potential to highly improve the current diagnostic approaches for heart disease by analyzing a large number of linked variables and spotting intricate patterns that might not be visible using merely traditional techniques (Rajpurkar et al., 2017).
+
+\newpage
+
+![The rate of ischaemic heart disease among men varies around the world, and similar variation exists for women. Sourced from "Cannon, B. Cardiovascular disease: Biochemistry to behaviour. Nature 493, S2–S3 (2013)." ](/Users/hassanainqazzaz/Downloads/Heartmap.png)
+
+The success of several machine learning algorithms in categorizing/classifying patients depending on the presence of cardiac disease is one of the study's main goals. The dataset being used contains various clinical and demographic variables, including age, sex, cholesterol levels, and ECG readings...etc. Support vector machines, Random Forest, Logistic Regression, and K-Nearest Neighbors are only some of the techniques that were employed in the analysis for this paper. Each algorithm is carefully evaluated for its sensitivity, specificity, and predicted accuracy. I further took into account how a number of preprocessing techniques, including feature scaling and one-hot encoding, affect how well is the performance of these algorithms. Models interpretability and robustness are prioritized for clear communication of results and clinical decision-making.
+
+A highlight of this paper is the classification of patients into various risk groups, for the purpose of planning individualized treatments and allocating resources depends on this. In order to examine potential categories or subgroups within the patient population, clustering methods like K-means and hierarchical clustering are applied to the dataset. For the purpose of understanding the separation between the clusters and visualizing the high-dimensional data, Principal Component Analysis (PCA) is utilized as a dimensionality reduction technique. The paper further does a thorough investigation of the clusters it formed, assessing their clinical importance. I also examined how various attributes help categorize patients and whether these categorizations align with recognized heart disease subgroups or risk profiles. Afterwards, predictive modelling was used to assess the accuracy of patient to cluster assignments. The models used for machine learning are tuned and tested with cross-validation approaches to ensure robustness and generalization. This thesis offers a thorough analysis of machine learning algorithms for patient stratification and heart disease classification.
+
+Furthermore, these discoveries have the potential to improve heart disease diagnosis by allowing for more individualized treatment planning, and ultimately better outcomes. I aim to fuse the knowledge between machine learning and its clinical use in cardiology by meticulous analysis, interpretation, and validation.
+
+## **Principles and Purpose**
+
+Most of the traditional methodologies for diagnosing cardiovascular diseases consist of clinical judgement and specialized diagnostic techniques like electrocardiograms and stress tests. However, the precision of such methods can vary, and they typically involve a certain amount of discretion. Moreover, when symptoms are vague or nonexistent, traditional diagnostic techniques usually fail to detect cardiac disease in its early stages due to a lack of sensitivity.
+
+On the other hand, machine learning approaches offer a potential be more sensitive and objective. A subset of artificial intelligence known as machine learning algorithms could automatically learn from data without the need for rule-based programming. They are able to analyze large datasets with a variety of factors and identify subtle patterns that might not be obvious to the naked eye. As a result, the illness can be quickly and efficiently identified in order to reduce consequences and administer treatment quicker. This is very helpful in medical diagnostics which caused machine learning to become more and more popular in the medical profession as a result of its successful application in a number of fields, including image recognition, natural language processing, and predictive analytics. Machine learning techniques may totally change how heart illness is detected and treated, according to a growing body of research, particularly in cardiology.
+
+## **Goals and Vision**
+
+There are three main goals for this study:
+
+1.     To assess and contrast the effectiveness of several machine learning classification algorithms for heart disease.
+
+2.     To investigate clustering and unsupervised learning methods for patient stratification.
+
+3.     To communicate the strength of machine learning  and its applications in the expert field (Clinical use).
+
+The classification-related algorithms explored include Support Vector Machines, Logistic Regression, Random Forest, and K-Nearest Neighbours. In this research clustering methods like K-means and hierarchical clustering to conduct patient stratification.
+
+## **Information and preparation**
+
+For the foundation of this analysis, I selected a comprehensive dataset including various clinical and demographic variables including age, sex, blood pressure, cholesterol levels, and ECG readings. This dataset emerged from the fusion of several previously independent datasets building on their common attributes. However, it is important to note that little is known about the sources of this dataset and how the data itself is collected. The analysis takes the variables and outcomes at face value, however, it is entirely possible that the data contains unknown biases or collection errors.
+
+This dataset is the most extensive heart disease dataset currently accessible for research, sourced from Kaggle. This particular compilation includes five distinct heart datasets all joint by eleven common attributes. Although the original dataset was created using four databases with 76 characteristics from the UCI machine learning repository, most published research only use a subset of 14 of these features.
+
+The Cleveland database stands out as the main resource used by machine learning researchers among these databases. The outcome variable in this database is identified as patient having cardiac disease. This variable is perceived by an integer value with a range of zero (representing no cardiac disease) to four. The Cleveland database for the longest time was primarily used to perceive the existence of heart disease within patients identified with values 1-4 or its absence identified with 0. Here is the contribution of each initial database to the final one:
+
+-   303 observations from Cleveland
+
+-   294 observations from Hungary
+
+-   123 observations from Switzerland
+
+-   200 observations from Long Beach, VA
+
+-   Data set for Stalog (Heart): 270 observations
+
+-   1190 observations in total
+
+-   duplicate observations: 272
+
+-   Remaining : 918 observations with 11 attributes and an outcome variable (Heart disease)
+
+Pre-processing this data is a crucial step in creating effective machine learning models. The research looks into how different preprocessing techniques affect the effectiveness of machine learning models, I investigate scaling, one-hot encoding, and feature selection. I also carefully consider how these preprocessing methods affect the models' interpretability and clinical applicability.
+
+# **Literature Review**
+
+## **Understanding Random forests**
+
+Breiman (2001) revolutionized machine learning with the introduction of random forests, which offer a simple solution to challenging classification issues. The core concept behind random forests is the construction of a large number of decision trees, which then employ a vote to determine the ultimate outcome. It is a known convectional theory that a shared assessment taking into account an array of viewpoints can prove more accurate.
+
+The concept of Bagging was first proposed by Breiman in 1996. With this concept a random pick from the training dataset is used to create each tree. Dietterich (1998) suggested a further fascinating approach in which each node of a tree would randomly select one of the top K alternatives to split the data. Breiman (1999) added an additional dimension by slightly altering the initial training data, while Ho (1998) recommended that each tree should only take into account a subset of attributes, further diversifying the mix.
+
+In respect to character recognition, Amit and Geman (1997) used a similar theory. To find the optimal splits at each node they generated a large number of geometric qualities and chose a random sample of them. The principle that each tree in the forest should be constructed randomly, guaranteeing that each tree gives a different perspective, lies at the heart of all these techniques. This is depicted visually in (Figure 2).
+
+**The 'Out-of-Bag' Concept and Voting**
+
+Upon being built these trees converge to reach a unanimous decision based on a majority vote. The collection of these choices is known as random forests (Figure 2).
+
+Breiman (2001) emphasized that one of the unique characteristics of random forests is the combination of feature selection with the concept of bagging. Bagging accomplishes two things. Primarily, it usually improves the model's general accuracy. Secondly, it allows for the assessment of the "generalization error" using what is known as out-of-bag estimations.
+
+The bootstrap method is largely responsible for out-of-bag estimations, which is done by taking a bootstrap sample (a random sample with replacement) that is used to train each tree, this is shown in (Figure 2). Some information points, nevertheless, are not included in this sample. This information act as a small test set for that particular tree for others who don't. This is where the "out-of-bag" idea is useful. This approach has been emphasized by Tibshirani (1996) as well as Wolpert and Macready (1996). It has the potential to be a potent tool for error estimation. This assertion was strengthened by Breiman (1996), who showed that these estimates from the bag can be just as reliable as having a separate test set that is the same size as the training dataset.
+
+
+![The intricate mechanism that drives the Random Forest algorithm is depicted in this diagram. A number of bootstrap samples are drawn starting with the training data, resulting in the creation of multiple decision trees. To make judgements and eventually create results, each tree uses a random selection of attributes. The majority vote of all trees determines the final verdict for a certain input. After the model has been trained, predictions are made using test data using the model. Utilising criteria like accuracy and AIC, the model's predictive prowess are assessed in the last stage. Created with the DiagrammeR package.](/Users/hassanainqazzaz/Downloads/D5.png)
+
+The limitation is that each bootstrap dataset typically excludes roughly one-third of the samples. Therefore, as Breiman (2001) emphasises that modifications are essential to provide fully objective findings. Particularly, out-of-bag estimates also highlight the model intrinsic strength and correlation, providing crucial information that can direct improvements.
+
+\break
+
+## **Heart Disease**
+
+Humans extended life expectancty along with the higher survival of people suffering a major myocardial infarction have led to a worldwide epidemic of heart failure. The United States is a region where these situations are particularly prevalent. In accordance to a study, 5 million Americans are thought to be affected by heart failure, with 550,000 new cases being documented annually. Furthermore, heart failure was the main reason for 1 million hospital discharges in 2001 in the United states (Konstam M, et al. 2004). For HF patients throughout the past ten years, a wide range of innovative therapy modalities have been accessible, many of which have shown to improve patients' clinical outcomes. Over the following ten years, several novel therapies including those dependent on medication, technology, and surgery, will all be reassessed leading to an increase in efficacy and intricacy of the treatment process (Konstam M, et al. 2004).
+
+
+The need for HF to be recognized as a critical and clearly defined specialty of cardiology is driven by the steadily rising patient population, together with the expansion of knowledge and treatment options (Konstam M, et al. 2004). The HF specialization should have a strong and comprehensive awareness of all available diagnostic and therapeutic methods, with a particular emphasis on the patient and the condition.
+
+The variety of pharmacological therapy alternatives will likely increase as a result of the various novel therapeutic targets that are now being defined. Also becoming more important in the therapeutic arsenal will be devices. In some populations, synchronized pacing devices and implantable cardiac defibrillators (ICDs) have shown promising therapeutic results. To help or unload the heart, new and more advanced gadgets will be created and made easier to implant. To explore the potential of reversing harmful cardiac remodeling, specialized devices that limit the heart's function are created (Konstam M, et al. 2004).
+
+Cardiovascular diseases (CVD) rise in direct proportion to any increase in physical inactivity (Crea, 2023). Over one out of every four individuals engage in insufficient amounts of aerobic physical activity (PA), which the World Health Organisation claim as 150--300 minutes of vigorous PA, 75--150 minutes of moderate PA, or a combination of the two (Crea, 2023).
+
+Nevertheless, regular exercise can also be highly helpful in supplemental prevention of cardiovascular disease in addition to primary prevention. Regular exercise and PA significantly reduce the risk of developing both main and secondary CVD (Crea, 2023). Furthermore, the benefits of living an active lifestyle largely depend on the dose (with some evidence for PA benefits even above current WHO guidelines). Exercise-induced cardiovascular benefits are specifically supported by a number of molecular pathways involving not just heart tissue but also metabolic and inflammatory variables. Recognising the complex impacts of exercise may also result in a more comprehensive approach to patient care and cardiovascular research (Crea, 2023).
+
+
+\newpage
+
+![The lead up to heart failure due to clogging of arteries caused by rising blood pressure, cholestrol and other lifestyle choices. Sourced from "Cannon, B. Cardiovascular disease: Biochemistry to behaviour. Nature 493, S2–S3 (2013)." ](/Users/hassanainqazzaz/Downloads/heartpic1.png)
+
+
+**Heart Failure Pathophysiology**
+
+The key to providing successful treatment for heart failure is to comprehend its pathogenesis. The primary issue with HF is that the heart cannot provide an output that is sufficient to support the body's metabolic needs, this is shown in (Figure 3) where fatty acids cause blockage of blood flow. Heart problems that are structural or functional may be the cause of this. Ischemic heart disease, hypertension, and valvular heart issues are some of the most typical signs of heart failure. Myocardial infarction and remodelling caused by ischemic heart disease are the main causes of HF. Contrary to what hypertension may suggest, diastolic dysfunction and left ventricular hypertrophy caused by cases shown in (Figure 3) can lead to heart failure (Hunt et al., 2009).
+
+Both heart failure with maintained ejection fraction (HFpEF) and heart failure with decreasing ejection fraction (HFrEF) are referred to as heart failure (HF). The ejection fraction, which determines the proportion of blood that leaves the heart with each contraction, serves as the foundation for this categorization. According to Borlaug (2014), HFpEF is indicated by a stiff heart muscle, whereas HFrEF is indicated by a weak heart muscle.
+
+**Identification of Heart Failure**
+
+Clinical history, physical examination, and further diagnostic procedures are used to detect heart failure. Fluid retention, tiredness, and dyspnea are the three main signs and symptoms. Biomarkers for the diagnosis include laboratory testing for B-type natriuretic peptide (BNP) and N-terminal pro b-type natriuretic peptide (NT-proBNP). As to Januzzi et al. (2006), elevated levels of these peptides are a sign of heart failure.
+
+For the assessment of heart failure, imaging investigations in general and echocardiography in particular are essential. In order to identify heart failure and choose the best course of therapy, echocardiography gathers information on the anatomy and physiology of the heart (Nishimura et al., 2017).
+
+**Administration of Heart Failure**
+
+Controlling heart failure is necessary to lessen symptoms, improve quality of life, and boost survival rates. Angiotensin receptor-neprilysin inhibitors, beta-blockers, ACE inhibitors, diuretics, and aldosterone antagonists are some of the drugs used in guideline-specific pharmacological therapy for HFrEF, this is the foundation of care for heart (Yancy et al., 2013).
+
+Because there are currently no evidence-based treatments that have been demonstrated to reduce mortality in HfpEF, treatment for HFpEF is generally focused on the management of congestion and comorbidities, such as hypertension and atrial fibrillation (Reddy & Borlaug, 2016).
+
+Along with drug therapies, lifestyle changes including a low-sodium diet, exercise, and weight management are essential to controlling heart failure and associated symptoms. For particular individuals, more advanced suggestions include cardiac re-synchronization treatment and implantable defibrillators (Ponikowski et al., 2016).
+
+New Technologies for the Treatment of Heart Failure. The advancement of technology has increased the importance of tele-medicine and remote patient monitoring in healthcare. Using tele-monitoring technology, healthcare personnel may remotely monitor patients' physiological data, allowing them to intervene quickly before symptoms develop (Inglis et al., 2010). The use of smartwatches and other wearable technology to monitor heart failure symptoms and improve self-management is also being studied (Steinhubl et al., 2015).
+
+**Considering the Relationship between Clinical Factors and Heart Failure**
+
+For the purpose of diagnosing and treating heart failure, evaluation of clinical characteristics and risk factors is essential. The next article goes into great depth on the connections between heart failure and several clinical factors that have been demonstrated by recent studies.
+
+**Relation between Age and Heart Failure**
+
+One of the most well-known factors causing heart failure is age. The heart's ability to consistently pump blood to the body decreases over time. Heart failure is more common in older people and is caused by structural issues such left ventricular hypertrophy, fibrosis, and arterial stiffness (Owan & Redfield, 2005). The Framingham Heart Study discovered that the risk of heart failure doubles every ten years starting at the age of 45 (Levy et al. ,2002).
+
+**Heart Failure Variations by Gender**
+
+The role of gender is important when discussing heart failure. Heart failure with preserved ejection fraction (HFpEF) is more common in women than heart failure with decreased ejection fraction (HFrEF), according to Dunlay et al. (2017). The aetiology is altered by the hormones that affect cardiac remodelling and stress response, which in turn affect gender variations in outcomes and risk.
+
+Bleumink et al. (2004) found that the prevalence of HF increases with age and is greater in men than in women. Heart failure is also associated with a high mortality rate, with nearly half of individuals diagnosed dying within five years (Roger, 2013).
+
+**Chest pain and heart failure**
+
+Ischemic heart disease, a prevalent cause of heart failure, is connected to the two forms of chest discomfort known as typical and atypical angina. Chest discomfort is brought on by a decreased blood flow to the heart muscles. The cardiac muscles may deteriorate as a result of prolonged ischemia, eventually leading to heart failure (Falk, 2011). Further types exist.
+
+**Hypertension and Heart Failure**
+
+High resting arterial pressure (RestingBP), a significant problem, is one of the risk factors for heart failure. Because of the thickening cardiac muscles brought on by hypertension, the heart's capacity to pump blood steadily decreases (Drazner, 2011). Effective blood pressure control is necessary to stop the onset and progression of heart failure (Whelton et al., 2018).
+
+**Cholesterol, Blood Sugar, and Heart Failure**
+
+Increasing cholesterol levels promote atherosclerosis, which can cause ischemic heart disease and ultimately heart failure. Additionally, diabetes---which is indicated by high fasting blood sugar (FastingBS)---is independently connected to an increased risk of heart failure, perhaps as a result of the harm hyperglycemia does to the heart muscle (Bell, 2003).
+
+**Electrocardiogram (ECG) changes**
+
+Resting electrocardiogram (ECG) anomalies such as ST-T wave abnormalities and left ventricular hypertrophy (LVH), are associated with an increased risk of heart failure. These ECG variations are a reflection of the anatomical abnormalities of the heart and underlying myocardial dysfunction (Eriksson et al., 2005).
+
+**Exercise-Induced Angina and Heart Failure**
+
+Heart failure is significantly influenced by coronary artery disease, which is frequently indicated by exercise-induced angina. Additionally, a diminished cardiac reserve is the root cause of resistance to exercise, an established marker of heart failure (Knuuti et al., 2020).
+
+**(Oldpeak) Slope and ST-Segment Depression**
+
+The depression of the ST-segment (Oldpeak) on the ECG and the characteristics of its slope are indicators of ischemia. An upsloping ST-segment is normally innocuous, but a flat or downsloping ST-segment is associated with ischemia.As a result, the risk of heart failure rose (Fihn et al., 2012).
+
+**MaxHR (maximum heart rate) and heart failure**
+
+The maximal heart rate (MaxHR) reached during exercise evaluation is yet another important aspect. It has been discovered that decreasing MaxHR and the risk of heart failure are connected. It demonstrates the heart's ability to adjust to increased demands, which may be hampered by cardiac conditions. It was demonstrated in a research by Lauer et al. (1999) that those with a decreased heart rate response to exercise had a noticeable increase in the risk of suffering heart failure.
+
+**Diagnostic and prescriptive modelling**
+
+A rise in the usage of predictive modelling in the therapeutic context is being attributed to advancements in processing speed and algorithms. Models like Logistic Regression, Random Forests, and Support Vector Machines are used to predict the risk of heart failure (Ahmad et al., 2018). These models make it easier to understand how each element affects the pathophysiology of heart failure and how they work together.
+
+To clarify, the characteristics that are most indicative of heart failure may be identified utilising feature importance analysis using random forest models. Heart failure risk may be affected logarithmically by changes in a single variable, and Support Vector Machines can provide intricate decision boundaries while taking interactions between features into consideration.
+
+**Moving forward**
+
+Personalised treatment regimens that are tailored to a patient's profile (age, sex, resting blood pressure, cholesterol, etc.) are emerging along with the profession of personalised medicine. Machine learning methods are increasingly being used in clinical decision-making. Finding the molecular links between these risk factors and heart failure may also point to novel therapy options.
+
+**Summary**
+
+Age, gender, and the kind of chest discomfort are clinical considerations.
+
+Exercise-induced angina, resting ECG abnormalities, cholesterol, fasting blood sugar, and resting blood pressure are all intimately associated with heart failure risk and aetiology. For the management, risk assessment, and early detection of heart failure, understanding these linkages is essential. Personalised prediction models can be used by clinicians to assist with risk assessment and treatment planning.
+
+## **Algorithms and research**
+
+**Performances of Support Vector Machines, Random Forests, and Logistic Regression algorithms**:
+
+Within the research of heart disease forecasting, Logistic Regression, Support Vector Machines (SVM), and Random Forests have become prominent machine learning approaches. To showcase this, Ahmad et al. (2018) showed how machine learning techniques may assist distinguish between clinically diverse phenotypes amongst heart failure patients, in addition to dramatically improving prognostication. The findings show substantial clinical significance since it gives insight into the diversity of therapeutic response. Additionally, Rajpurkar et al. (2017) demonstrated that machine learning may perform at a medical expert's level, sometimes even outperforming human cardiologists, by using convolutional neural networks to detect arrhythmia.
+
+**Relevance of Characteristics in Heart Disease Prognosis**:
+
+Characteristics such as age, sex, cholesterol levels, and resting blood pressure have significant impact upon being incorporated  in the prognosis of heart disease, this revelation was found from the research. The epidemiological implications of those features was highlighted in the research produced by Dunlay et al. (2017), especially in the context of heart failure with retained ejection fraction, a form of heart failure where the main pumping chamber of the heart is still mostly intact.
+
+Additionally, Drazner (2011) elaborated on how age and blood pressure may have a special impact on how hypertensive heart disease progresses. He emphasised that chronic hypertension could influence change in the anatomy of the heart. Similar to this, Bell (2003) investigated the relationship between diabetes and heart failure, highlighting the potential role that high cholesterol levels may hold a role in this interaction.
+
+
+**Potential Implications and Personalised Medicine**:
+
+The ultimate goal of applying these machine learning models and understanding the interaction between various factors is improving patient care. Individualised treatment strategies based on a patient's profile can produce noticeably improved outcomes for those with heart failure, claim Ahmad et al. (2018).
+
+It has been shown that the most popular machine learning models for predicting cardiac illness are Logistic Regression, Random Forests, and Support Vector Machines. Understanding the relationship between and significance of factors including age, sex, cholesterol levels, resting blood pressure, and ECG data is crucial. The identification of subgroups by clustering algorithms may lead to a dynamic transition from one-size-fits-all methods to individualised patient treatment.
+
+**The machine learning algorithms' interpretability**:
+
+Depending on the algorithm employed, interpretability differs. Ahmad et al. (2018) stressed the need of ensuring that the models are easy for doctors to grasp in addition to achieving prediction accuracy. For models to be applied in clinical settings, interpretability is essential since it enables medical practitioners to understand and accept the predictions made by the algorithms.
+
+It cannot be emphasised how important it is to carefully choose and create the requirements for these models. Understanding which traits are accurate predictors is crucial for creating effective models and for advancing understanding of cardiac illnesses, as stressed by Dunlay et al. (2017) and Drazner (2011). There are times when it is feasible to extract additional features from current data, such interaction terms or aggregated data, which may show underlying patterns that simple models would overlook.
+
+**Metrics for model validation and assessment:**
+
+The process of validating machine learning models is also a crucial one that needs to be taken into account. Rajpurkar et al. (2017) underlined the usage of suitable cross-validation procedures to ensure that the algorithms effectively generalise to fresh data. Additionally, picking the appropriate assessment metrics is crucial to guaranteeing that the models are judged in accordance with criteria that are clinically useful.
+
+
+**Combining data from several sources:**
+
+Rajpurkar et al. (2017) provided an illustration of how to combine several data sources to produce more accurate prediction models using ECG data along with clinical parameters. For more extensive modelling, it may be possible to combine many data sources, including genomes, lab tests, and patient-reported outcomes, with the advent of wearable technology and electronic health records.
+
+It is crucial to emphasise that utilising machine learning to study health data involves ethical issues. It is crucial to ensure that the population-representativeness of the data used in the analysis and the forecasts' lack of accidental biases towards any one demographic. The research mentioned did not investigate the topic in depth.
+
+
+**Clustering for Subgroup Identification**:
+
+Clustering is another machine learning approach with great use in heart disease research. The efficiency of K-means clustering in identifying patterns within heart disease data was emphasised by Kiani et al. (2016). The group of people with cardiac disease may be divided into clusters or subgroups, allowing for a more accurate tailoring of treatment plans to the unique traits of each segment. This shall have a crucial role in the advancement of personalised medicine, wherein treatment regimens are tailored specifically for every individual based on their particular clinical description.
+
+**Clustering for patient stratification:**
+
+Clustering research by Kiani et al. (2016) also illuminates a crucial element of patient classification. By defining subgroups among the heart disease patients, it may be easier to understand the differential aetiologies and disease processes among different patient populations. Understanding how various cohorts respond to treatment differently and identifying high-risk populations may depend on this segmentation.
+
+
+**Approach and Methodology:**
+
+I use a variety of strategies to develop classification models and assess the efficacy of my work using metrics like accuracy, sensitivity, specificity, and area under the ROC curve. These models are enhanced further by iterative hyperparameter adjustment. I use Principal Component Analysis (PCA) dimensionality reduction techniques for visualisation and clustering algorithms for patient classification. A complete clinical feature analysis of the resultant clusters is conducted to ascertain their significance.
+
+Interpretability must be a crucial element of any model aimed at therapeutic application. As a result, this study focuses some time to looking at the interpretability of models, evaluating how different preprocessing and strategy decisions impact the models' ability to produce interpretations that are therapeutically helpful.
+
+\break
+
+# Analysis and Results
+
+## **Exploratory data analysis**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(fig.height=4, fig.width=6)
+library(knitr)
+library(kableExtra)
+```
+
+```{r,message=FALSE,warning=FALSE,include=FALSE}
+
+library(tidyverse)
+library(GGally)
+library(dplyr)
+library(caret)
+library(e1071)
+library(randomForest)
+library(gbm)
+library(pROC)
+library(gridExtra)
+library(heatmaply)
+library(fastDummies)
+library(ggfortify)
+library(shiny)
+library(clustMixType)
+library(cluster)
+library(plotly)
+library(ggalt)
+library(ggforce)
+library(shinythemes)
+library(stargazer)
+library(MASS)
+library(glmnet)
+library(float)
+library(huxtable)
+library(broom)
+library(grid)
+
+# set directory
+setwd("/Users/hassanainqazzaz/Downloads")
+
+# Read the data
+df = read.csv("heart.csv")
+
+
+# Pre-process
+
+df$Sex <- as.factor(df$Sex)
+df$ChestPainType <- as.factor(df$ChestPainType)
+df$RestingECG <- as.factor(df$RestingECG)
+df$ExerciseAngina <- as.factor(df$ExerciseAngina)
+df$ST_Slope <- as.factor(df$ST_Slope)
+df$FastingBS = as.factor(df$FastingBS)
+df$HeartDisease = as.factor(df$HeartDisease)
+
+
+# Select only numeric columns
+numeric_columns <- sapply(df, is.numeric)
+scaled_data <- scale(df[, numeric_columns])
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Split the data into training (80%) and testing (20%) sets
+index <- createDataPartition(df$HeartDisease, p=0.8, list=FALSE)
+train_set <- df[index, ]
+test_set <- df[-index, ]
+
+
+```
+
+
+
+```{r,message=FALSE,warning=FALSE,echo=FALSE,fig.pos="H", fig.cap="Table 1 contains all variable names, descriptions and summaries to familiarise with the nature of the dataset."}
+# Create data
+table_data <- data.frame(
+  Variable = c("Age (years)", 
+               "Sex", 
+               "ChestPain_Type", 
+               "RestingBP (mm Hg)", 
+               "Cholesterol (mm/dl)", 
+               "FastingBS", 
+               "RestingECG", 
+               "MaxHR", 
+               "Exercise_Angina", 
+               "Oldpeak (depression)", 
+               "ST_Slope", 
+               "HeartDisease"),
+  Description = c("Age of the patient", 
+                  "Gender of the patient: Male (M) or Female (F)", 
+                  "Type of chest pain: Typical Angina (TA), Atypical Angina (ATA), Non-Anginal Pain (NAP), Asymptomatic (ASY)", 
+                  "Resting blood pressure of the patient", 
+                  "Serum cholesterol level", 
+                  "Fasting blood sugar: 1 if > 120 mg/dl, 0 otherwise", 
+                  "Results of resting electrocardiogram: Normal, ST-T wave abnormality (ST), left ventricular hypertrophy (LVH)", 
+                  "Maximum heart rate achieved during exercise", 
+                  "Angina induced by exercise: Yes (Y) or No (N)", 
+                  "ST depression induced by exercise relative to rest", 
+                  "Slope of the peak exercise ST segment: Upsloping (Up), Flat, Downsloping (Down)", 
+                  "Output class determining presence of heart disease: 1 indicates heart disease, 0 indicates normal"),
+  Summary = c("Majority between 47-60 years. Average age: 53.5 years.", 
+              "725 Males; 193 Females.", 
+              "Majority report ASY chest discomfort.", 
+              "Average: 132.4 mmHg. Majority have readings between 120-140 mmHg.", 
+              "Average level: 198.8 mm/dl. Majority between 173.2-267 mm/dl.", 
+              "Majority (704 patients) have readings below 120 mg/dl.", 
+              "Majority (552) show Normal ECG, followed by LVH and ST.", 
+              "Range: 60-202 bpm. Average: 136.8 bpm.", 
+              "547 do not experience exercise-induced angina, 371 do.", 
+              "Average ST depression ranges from 0.89 to -2.6.", 
+              "Most patients have an upsloping or flat ST slope.", 
+              "508 patients have heart disease; 410 do not.")
+)
+
+# Render table with kableExtra
+kable_output <- knitr::kable(table_data, align = "l", caption = "Table of Patient Attributes, descriptions, and summaries", format = "latex", booktabs = TRUE) %>%
+  kable_styling(full_width = FALSE, font_size = 8) %>%
+  column_spec(2, width = "4cm") %>% row_spec(0, extra_latex_after = "\\addlinespace[2em]")
+
+# Display or save the table
+kable_output
+
+```
+
+\newpage
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.pos='H',collapse=TRUE, fig.cap="This figure showcases categorical variables grouped by heart disease, addressing the fundemental differenes in charactertiscs"}
+
+
+
+# Create a bar plot for each categorical feature
+plot_Sex <- df %>%
+  ggplot(aes(x = Sex, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Sex", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_ChestPainType <- df %>%
+  ggplot(aes(x = ChestPainType, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Chest Pain Type", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_FastingBS <- df %>%
+  ggplot(aes(x = FastingBS, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Fasting Blood Sugar", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_RestingECG <- df %>%
+  ggplot(aes(x = RestingECG, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Resting ECG", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_ExerciseAngina <- df %>%
+  ggplot(aes(x = ExerciseAngina, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Exercise Induced Angina", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_ST_Slope <- df %>%
+  ggplot(aes(x = ST_Slope, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "ST Slope", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+# Combine all plots
+grid.arrange(plot_Sex, plot_ChestPainType, plot_FastingBS, plot_RestingECG, plot_ExerciseAngina, plot_ST_Slope, ncol = 2)
+
+
+
+
+
+```
+
+
+Figure 4 illustrates a series of plots that were created separating the categorical variables by heart disease to perceive the difference in the characteristics between patients.
+
+Heart disease and sex: A clear discrepancy is shown in sex in respect to heart disease. Males are more susceptible than females to suffer from heart disease. Whereas there is almost double as many men as women without heart disease this is further proven by the summaries from (Table 1). The disparity increases dramatically when individuals with the illness are taken into account. This disparity may be caused by a variety of things, such as biological variations, dietary preferences, or a mix of the two. This also aligns with the literature from Bleumink et al. (2004) which found that the prevalence of HF increases with age and is greater in men than in women.
+
+Chest Pain and Diagnosis: Chest pain type is an significant symptom when assessing cardiac related diseases Patients with heart disease are far more likely to experience "asymptomatic" chest discomfort (ASY) which is the most prominent overall as shown in (Table 1). 'Atypical Angina' (ATA) on the other hand, appears to be more prevalent in those who do not have cardiac disease. This may suggest that many people with heart disease do not exhibit the typical symptoms, highlighting the significance of thorough medical exams as opposed to assessments that are solely focused on symptoms.
+
+Fasting Blood Sugar: Patients with heart disease are prone to have increased fasting blood sugar (more than 120 mg/dl). Conditions such as diabetes pose a risk factor for cardiovascular illnesses, might be indicated by elevated blood sugar levels.
+
+Resting electrocardiogram (ECG):  Patients with cardiovascular illness have a greater prevalence of ST-T wave abnormalities (ST) and left ventricular hypertrophy (LVH). These two symptoms raise the possibility of underlying cardiac problems. Specifically, LVH results in an enlarged left ventricle and can be brought on by chronic high blood pressure or other heart-taxing disorders.
+
+Exercise-Induced Angina: This is where there is a clear distinction: people with heart disease are far more likely to have angina (chest discomfort) when they are exercising. This represents the heart's diminished capacity to cope with a rising workload, which is frequently brought on by coronary artery narrowing.
+
+Exercise-Induced ST Slope: The slope of the peak exercise ST segment might provide information about heart health. The majority of healthy patients display a "Upsloping" or flat ST slope. A 'Flat' ST slope, on the other hand, is quite common in people with heart disease, presumably indicating decreased blood flow during exercise.
+
+
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE, results='asis'}
+
+# Create a summary table
+summary_table <- df %>%
+  group_by(HeartDisease) %>%
+  summarise(
+    Age = mean(Age),
+    RestingBP = mean(RestingBP),
+    Cholesterol = mean(Cholesterol),
+    MaxHR = mean(MaxHR),
+    Oldpeak = mean(Oldpeak)
+  )
+
+# convert summary_table to matrix and transpose it
+summary_matrix <- data.matrix(summary_table[, -1])  # exclude the factor column
+rownames(summary_matrix) <- summary_table$HeartDisease
+
+# transposing the matrix
+transposed_summary_matrix <- t(summary_matrix)
+
+# then use the stargazer function
+stargazer(transposed_summary_matrix, 
+          type = 'latex', 
+          header = F,
+          title = "Summary Statistics grouped by heart disease",
+          rownames = TRUE,
+          digits=2)
+
+
+```
+
+Table 2 shows further examination of the data to perceive the attribute differences between patients with heart disease and those without. A summary statistics table that highlights the variations in the mean characteristics between people with heart disease (1) and those without the ailment (0) was made.
+
+***Age***
+
+The mean age of patients with heart disease is 55.9 years old, which is much older than the average age of those without heart disease, which is 50.55 years old. This disparity emphasizes the age-related rise in vulnerability to heart disease, highlighting age as a significant risk factor.
+
+***Resting Blood Pressure***
+
+Patients with heart disease have a mean RestingBP of 134.185 mmHg as opposed to 130.18 mmHg in the patients without. This causes an increased burden on the heart  brought on by higher blood pressure, which might raise the risk of issues connected to the heart. As a result, a higher mean RestingBP in people with heart disease may be a sign of the role that blood pressure plays in the development of heart disease.
+
+***Cholesterol***
+
+The average cholesterol levels in patients with heart disease is much lower (175.941 mg/dl) than in people without heart disease (227.122 mg/dl), in contrast to trends in age and RestingBP. This seems counterintuitive given that high cholesterol levels are frequently associated with heart disease, the discovery may be due to heart disease patients' successful use of cholesterol-lowering medications like statins, or existing anomalistic values in the dataset that are exclusive to heart disease patients.
+
+***Max heart rate***
+
+Patients with heart disease had a lower mean MaxHR (127.656 beats per minute) than those without (148.151 beats per minute). This decrease in MaxHR in people with heart disease may be due to weakened cardiovascular health or underlying cardiac problems that limit the heart's ability to function at its maximum rate. This is supported by the literature that asserts the importance of MaxHR as an important factor to consider for cardiovascular health.
+
+***Oldpeak***
+
+The mean Oldpeak value for the heart disease group is much greater (1.274) than it is for the non-disease group (0.408). This higher mean Oldpeak in heart disease patients emphasizes the value of this metric in identifying and comprehending heart disease.
+
+This summary table and plots showcase the inherent significant differences in lifestyle and characteristics for patient with and without heart disease. As a consequence, it emphasizes the requirement of individualized and concentrated medical care for these factors in the prevention and treatment of cardiac disease.
+
+## **Models and their summaries**
+
+A training set and a testing set of the data were created. The first method to be employed is a logistic regression model fitted to a training set with a binomial distribution. The description of the logistic regression model highlights the significance of each variable, and the coefficients illustrate the projected effects of each independent variable on the dependent variable. For instance, SexM (indicating male sex), ChestPainTypeATA, ChestPainTypeNAP, Cholesterol, FastingBS1, ExerciseAnginaY, Oldpeak, and ST_SlopeFlat are all statistically significant predictors at a significance threshold of 0.05 (some even at far lower levels).
+
+The confusion matrix and accompanying data show the performance of the model. The accuracy is quite good, at about 91.26%. This shows that the model correctly recognized people who had heart illness on the test set 91% of all instances. The Kappa statistic is 82%, which is considered to be favorable. Kappa is a measure of accuracy that takes into consideration the possibility that the forecast's accuracy may have been due to chance alone. According to the model's sensitivity, also known as the recall metric, almost 89% of the patients with heart disease were correctly recognized. The algorithm correctly recognized 93% of the people without heart illness which is shown through the specificity metric.
+
+The model is generally accurate in predicting whether or not a patient has heart disease, as shown by the fact that both the Positive Predictive Value (PPV) and the Negative Predictive Value (NPV) are about 91%. For example, having a male patient and fasting blood sugar levels greater than 120 mg/dl seem to increase the risk of getting heart disease, but Atypical Angina and Non-Anginal Pain tend to lower the risk. Having exercise-induced angina also seems to increase the risk.
+
+After the logistic regression, support vector machine and random forest models were fitted and assessed using summary metrics and (ROC) curves. Probability that a randomly chosen positive example (heart disease) would be positioned next to a randomly chosen negative example (no heart disease) is conceived through the area under curve (AUC) metric.
+
+AUC ranges in value from 0 to 1. AUC values of 1 and 0 denote models with 100% accurate predictions and 100% incorrect predictions, respectively. Making predictions at random is similar to having an AUC of 0.5.
+
+All three models have very high AUC ratings after comparing the methods, which shows that they are all very effective in distinguishing between those who have heart disease and those who do not.
+
+-   Logistic regression model: 0.9429
+
+-   Random forest model: 0.9491
+
+-   SVM model: 0.9474
+
+The metrics show the models being fairly equal with the Random Forest model having a little edge. However, the discrepancies are not substantial showing that each model has distinct advantages. Based only on data, the Random Forest model would be the optimal approach solely based on AUC. Nevertheless, AUC is not the only metric to be taken into consideration when comparing models.
+
+With random forest models, feature significance analysis is a helpful technique that displays features based on how well they can predict an outcome variable. This may vary based on the selected prediction model. A feature's usefulness in a decision tree or random forest model depends on how much performance it enhances.
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+
+# Train a logistic regression model
+logistic_model <- glm(HeartDisease ~ ., data=train_set, family=binomial())
+
+
+# Predict on the testing set
+predictions <- predict(logistic_model, newdata=test_set, type="response")
+
+# Convert probabilities to binary predictions
+predictions <- ifelse(predictions > 0.5, 1, 0)
+
+# Generate a confusion matrix
+cmlog = confusionMatrix(as.factor(predictions), as.factor(test_set$HeartDisease))
+
+accuracylog1 <- cmlog$overall["Accuracy"]
+
+
+
+# Fit the full model
+full_model1 <- glm(HeartDisease ~ ., family = "binomial", data = train_set)
+
+# Perform backward selection
+reduced_model1 <- step(full_model1, direction = "backward")
+
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+# Fit the random forest model
+rf_model <- randomForest(HeartDisease ~ ., data = train_set)
+
+# Make predictions on the test data
+rf_predictions <- predict(rf_model, newdata = test_set)
+
+# Evaluate the model
+cmrf = confusionMatrix(as.factor(rf_predictions), as.factor(test_set$HeartDisease))
+
+
+accuracyrf1 <- cmrf$overall["Accuracy"]
+
+
+# SVM
+
+# Fit the SVM model
+svm_model <- svm(HeartDisease ~ ., data = train_set, kernel = "radial")
+
+# Make predictions on the test data
+svm_predictions <- predict(svm_model, newdata = test_set)
+
+# Evaluate the model
+cmsvm = confusionMatrix(as.factor(svm_predictions), as.factor(test_set$HeartDisease))
+
+
+accuracysvm1 <- cmsvm$overall["Accuracy"]
+
+
+
+
+##
+
+# Set up cross-validation
+control <- trainControl(method="cv", number=10)
+
+# Tune the model
+grid <- expand.grid(.mtry=c(1:10)) 
+
+rf_model1 <- train(HeartDisease ~ ., data=train_set, method="rf", 
+                  trControl=control, tuneGrid=grid)
+
+# Check the best parameters
+print(rf_model1$bestTune)
+
+# Make predictions on the test data
+rf_predictions1 <- predict(rf_model1, newdata=test_set)
+
+# Evaluate the model
+confusionMatrix(as.factor(rf_predictions), as.factor(test_set$HeartDisease))
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+# Fit the SVM model
+svm_model <- svm(HeartDisease ~ ., data = train_set, kernel = "radial",probability = TRUE)
+
+# Make predictions on the test data
+svm_predictions <- predict(svm_model, newdata = test_set,probability = TRUE)
+
+# Evaluate the model
+confusionMatrix(as.factor(svm_predictions), as.factor(test_set$HeartDisease))
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+# Logistic
+
+roc_obj <- roc(test_set$HeartDisease, predictions)
+
+# Plot the ROC curve
+plot(roc_obj, main="ROC Curve for Logistic Regression")
+
+# Print the AUC
+cat("AUC for the Logistic Regression model: ", auc(roc_obj))
+
+
+# Random forest
+
+rf_predictions2 <- predict(rf_model, newdata = test_set, type="prob")[,2] 
+# ROC for Random Forest
+roc_obj_rf <- roc(test_set$HeartDisease, rf_predictions2)
+
+# Plot the ROC curve
+plot(roc_obj_rf, main="ROC Curve for Random Forest")
+# Print the AUC
+cat("AUC for the Random Forest model: ", auc(roc_obj_rf))
+
+
+# SVM
+
+svm_predictions1 <- attr(svm_predictions, "probabilities")[,2]
+
+# ROC for SVM
+roc_obj_svm <- roc(test_set$HeartDisease, svm_predictions1)
+
+# Plot the ROC curve
+plot(roc_obj_svm, main="ROC Curve for SVM")
+# Print the AUC
+cat("AUC for the SVM model: ", auc(roc_obj_svm))
+
+
+
+
+```
+
+```{r,results='asis',warning=FALSE,collapse=TRUE,message=FALSE,echo=FALSE}
+
+# Logistic regression model summary table
+
+stargazer(logistic_model, 
+          type = "latex",
+          title="Results from Logistic Regression",
+          header = FALSE,
+          rownames = TRUE,
+          font.size="small",
+          digits=2)
+```
+
+
+**Logistic regression model:** Table 3 contains the summary results from the logistic regression model as well as diagnostic metrics.
+
+Sex (Gender):
+
+The Male (SexM) Coefficient: 1.42
+
+The model shows that the log-odds of men developing heart disease are 1.42 higher than those of women. The disparity in the dataset could be cause to this where (725) males exist versus (193) girls in our sample. This necessitates the tailoring of intervention methods and treatments for the male patients.
+
+Chest Pain Type (ChestPainType):
+
+For categorical variables the logistic regression model used one of the categories as a reference baseline to compare the other categories to. This is represented by the coefficients. For this case the reference is (ASY) Chest pain 
+
+Coefficients:
+TA: 1.66 ATA: -1.89, NAP: -1.69
+
+The model compared to those who had ASY-type chest discomfort (496 people), those who had ATA (173), NAP (203), and TA (46). All three other categories showed negative coefficients which  had significantly reduced log-odds of heart disease. This emphasizes ASY as a significant heart disease predictor among other forms of chest pain.
+
+Electrocardiogram at Rest (Resting ECG):
+
+Coefficients:
+
+Standard: -0.11
+ST: -0.10
+
+The model compared the LVH group (188) to those with either a Normal (552) or ST (178) resting ECG. The result shows a somewhat lower log-odds of heart disease. This distinction however, is not statistically significant.
+
+Slope T:
+
+
+Coefficients:
+Flat: 1.6
+Up: -0.75
+
+Model showed the Flat ST slope (460) have increased log-odds of developing heart disease over Down group (63). On the other hand, the Up Slope group (395) showed reductions in log-odds. This, however is not significant.
+
+Exercise-Related Angina:
+
+Yes (Y) has a coefficient of 0.83.
+
+Patients (371) who experienced angina while exercise had 0.83 higher risks of having heart disease than patients (547) who didn't. Monitoring symptoms associated to exercise gets essential since they could prove as preliminary complications to cardiac diseases.
+
+Furthermore, the model showcased a negative correlation between the risk of heart disease and a unit rise in cholesterol was seen. This is counter intuitive in relation to the literature however it can be attributed to collection errors, since when patients cholesterol was missing or mismeasured the recording placed instead were extremely low (0). Additionally, individuals who have fasting blood sugar (FastingBS1) levels above 120 mg/dl have greater risks than those who do not. 
+
+\break
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.cap="Diagnostic plots for the logistic model."}
+
+residuals_deviance <- residuals(logistic_model, type = "deviance")
+log_resid_plot = ggplot(data.frame(residuals_deviance), aes(x=residuals_deviance)) + 
+  geom_histogram(binwidth=.5, fill="blue", color="white", alpha=0.7) +
+  labs(title="Histogram of Deviance Residuals")
+
+
+predicted_probs <- predict(logistic_model, type = "response")
+roc_obj <- roc(logistic_model$y, predicted_probs)
+
+# Convert roc_obj into a ggplot object
+log_roc_ggplot = ggroc(roc_obj,color = "blue") + ggtitle("ROC Curve") + theme_minimal()
+
+# Combine two ggplot objects side by side
+grid.arrange(log_resid_plot, log_roc_ggplot, ncol=2)
+
+```
+
+
+**Performance & Diagnostics of the Model:**
+
+Deviance Residuals: Showed a near-normal distribution with a slight negative skew as showen in (Figure 5). This suggests that the model may have underestimated the frequency of some events.
+
+Hosmer-Lemeshow Test: A p-value of 0.7966 was obtained, confirming accurate predictions and a good model fit.
+
+Comparison of predicted and observed data shows that most points are aligned at 0 or 1, highlighting the model's precise predictions for binary outcomes.
+
+ROC Curve: With an AUC of 0.9293, the curve shows how well the model can distinguish between two groups as showed in (Figure 5).
+
+All values of the variance inflation factor (VIF) that are considerably lower than 10 allay worries about multicollinearity.
+
+
+
+The model has strong predictive skills, with an outstanding AUC of 0.9293. The modest negative skew in the residuals necessitates more investigation even if the fit is good and devoid of multicollinearity problems. Re-evaluating feature selection, investigating the connections between variables, or testing the model on other datasets are all possible improvements.
+
+
+
+```{r,results='asis',warning=FALSE,message=FALSE,echo=FALSE,fig.cap="Feature importance analysis using the GINI index for Heart disease attributes"}
+
+## Feature importance analysis
+
+# Calculate feature importance
+importance <- importance(rf_model)
+
+# Create a data frame for plotting
+importance_df <- data.frame(
+  Feature = row.names(importance),
+  Importance = importance[, "MeanDecreaseGini"]  # Use Gini importance
+)
+
+
+# Sort by importance
+importance_df <- importance_df[order(-importance_df$Importance), ]
+
+# Plot feature importance
+ggplot(importance_df, aes(x = reorder(Feature, Importance), y = Importance)) +
+  geom_bar(stat = "identity",fill="gold",color = "black") +
+  coord_flip() +
+  labs(x = "Feature", y = "Importance (Gini)", title = "Feature Importance")
+
+```
+
+Three primary uses exist for feature importance shown in (Figure 6):
+
+• Simplifying the model and improving its performance when used with new data may be accomplished by selecting the most important attributes.
+
+• Interpretation of the model: Knowing which traits are most important aids in explaining the model to stakeholders and provide information about the problem. This is shown in (Figure 6)
+
+• Data insights: They help reveal patterns and relationships in the data that were previously hidden.
+
+As such a feature importance analysis was carried out and plotted (Figure 6). The outcome was compared to the logistic regression model shown in (Table 3).
+
+Age: In the logistic model, age is not statistically significant at the 0.05 level of significance. In contrast, it has a rather high significance value in the random forest model.
+
+Sex: According to the logistic model, sex is highly significant in association with heart disease and the random forest model also gives it high importance.
+
+ChestPainType: The logistic model shows a strong correlation between heart disease and the forms of chest pain (ATA, NAP, and TA; all p 0.001). ChestPainType has the greatest relevance value in the random forest model, which is consistent with this.
+
+RestingBP: Although this variable is not statistically significant  in the logistic model, it shows reasonable importance in the random forest model.
+
+Cholesterol: The logistic model demonstrates that cholesterol is significant and that it has a high importance in the random forest model.
+
+RestingECG: Neither the Normal nor the ST RestingECG categories are statistically significant in the logistic model. However, RestingECG is given more weight in the random forest model than other a few other variables.
+
+MaxHR: According to the logistic model, MaxHR is insignificant. However, it has a pretty high significance in the random forest model.
+
+The previously noted variations between the random forest model and the logistic regression model might be a result of the intrinsic design features of these two models. Logistic regression presupposes a linear relationship between the predictors and the response variable (after a logit transformation), in contrast to random forest, which is a non-linear model. Furthermore, unlike random forest, logistic regression may not be capable of reliably capturing intricate interactions between variables unless these interactions are explicitly included in the model.
+
+Additionally, a random forest's relevance measure which is based on how much predictive accuracy falls when a feature is removed, might not exactly coincide with a logistic regression p-value, which determines if a feature's coefficient is zero. In addition, random forest outperformed logistic regression in terms of overcoming outliers and insignificant attributes.
+
+It is therefore expected to find some differences between the findings of these two different models. These variations highlight the need of using a range of models to adequately understand the data.
+
+**Adjusting p-values:**
+
+To delve deeper into the model comparison and explore the differences an intricate approach was introduced. After the EDA it was apparent that the outcome variable had a slight imbalance favoring heart disease. This means that patients with heart disease formed the majority of observations. As such some curious questions came about, could adjusting the threshold of models result in better predictions?, is there a majority favoritism in the models predictions?
+
+Reducing false negatives, or predicting that a patient does not have heart disease when they really do, is a prevalent occurrence in healthcare, especially for high-risk instances like heart disease. These are Type II errors and are typically seen as more dangerous than Type I errors, which take place when a healthy patient is incorrectly classified as having the condition. This is due to the fact that a Type II error may delay the diagnosis of a specific patient's situation, causing it to worsen and decreasing the likelihood that the treatment will be successful.
+
+A model with high sensitivity (also known as True Positive Rate, or Recall) would have fewer false negatives. The percentage of successfully discovered real positives that are detected with accuracy is what is characterised by the sensitivity metric.
+
+There are adjustments that may be made to the three models---logistic regression, random forest, and SVM---used to attempt and improve sensitivity. Changing the decision threshold in the model is a frequent way to do this. Most models have a default threshold of 0.5, which indicates that forecasts for probabilities over 0.5 are positive and those for probabilities below 0.5 are negative. If you lower this threshold, the model will forecast more positives, which might increase sensitivity and reduce false negatives at the expense of perhaps increasing false positives. The balance of the outcome variable, which in this example is around 55% instances with heart disease to 45% cases without, is a standard reference for how to set the threshold.
+
+After implementing and assessing this approach, it had a negative effect on both logistic regression and SVM models making them perform worse. However, it displayed a great improvement on the random forest model performance as evident by the accuracy, ROC and AUC which saw a great improvement.
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+# Apply one-hot encoding to the dataset. 
+df_encoded1 <- dummy_cols(df, remove_first_dummy = TRUE)
+
+# Remove the original categorical columns
+df_encoded1 <- df_encoded1[ , !(names(df_encoded1) %in% c("Sex", "ChestPainType", 
+      "FastingBS", "RestingECG", "ExerciseAngina", "ST_Slope","HeartDisease"))]
+
+
+# Convert HeartDisease to factor before splitting into training and testing sets
+df_encoded1$HeartDisease_1 <- as.factor(df_encoded1$HeartDisease_1)
+
+# Now split the data and fit the SVM model as you did before
+index1 <- createDataPartition(df_encoded1$HeartDisease_1, p=0.8, list=FALSE)
+train_set1 <- df_encoded1[index1, ]
+test_set1 <- df_encoded1[-index1, ]
+
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+# Fit the logistic regression model
+log_model <- glm(HeartDisease_1 ~ ., data = train_set1, family = "binomial")
+
+# Summarize the model
+summary(log_model)
+
+# Make predictions on the test data
+log_probabilities <- predict(log_model, newdata = test_set1, type = "response")
+log_predictions <- ifelse(log_probabilities > 0.5, 1, 0)
+
+# View confusion matrix
+cmlog2 = confusionMatrix(as.factor(log_predictions), test_set1$HeartDisease_1)
+
+
+accuracylog2 <- cmlog2$overall["Accuracy"]
+
+
+
+
+# Fit the random forest model
+rf_model1 <- randomForest(HeartDisease_1 ~ ., data = train_set1)
+
+# Make predictions on the test data
+rf_predictions1 <- predict(rf_model1, newdata = test_set1)
+
+# Evaluate the model
+cmrf2 = confusionMatrix(as.factor(rf_predictions1), as.factor(test_set1$HeartDisease_1))
+
+
+accuracyrf2 <- cmrf2$overall["Accuracy"]
+
+
+# Define training control
+train_control <- trainControl(method="cv", number=5)  # 5-fold CV
+
+svm_model_cv <- train(HeartDisease_1 ~ ., data=train_set1, 
+                      trControl=train_control, method="svmRadial")
+
+
+# Make predictions on the test data
+svm_predictions <- predict(svm_model_cv, newdata = test_set1)
+
+# Now this should work
+cmsvm2 = confusionMatrix(as.factor(svm_predictions), test_set1$HeartDisease)
+
+
+accuracysvm2 <- cmsvm2$overall["Accuracy"]
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+### ONE HOT ENCODING AND SCALING
+
+# Apply one-hot encoding to the dataset.
+df_encoded <- dummy_cols(df, remove_first_dummy = TRUE)
+
+# Remove the original categorical columns
+df_encoded <- df_encoded[ , !(names(df_encoded) %in% c("Sex", "ChestPainType", 
+                                                       "FastingBS", "RestingECG", "ExerciseAngina", "ST_Slope","HeartDisease"))]
+
+
+# Convert HeartDisease to factor before scaling
+df_encoded$HeartDisease_1 <- as.factor(df_encoded$HeartDisease_1)
+df_encoded$Sex_M <- as.factor(df_encoded$Sex_M)
+df_encoded$ChestPainType_ATA <- as.factor(df_encoded$ChestPainType_ATA)
+df_encoded$ChestPainType_NAP <- as.factor(df_encoded$ChestPainType_NAP)
+df_encoded$ChestPainType_TA <- as.factor(df_encoded$ChestPainType_TA)
+df_encoded$FastingBS_1 <- as.factor(df_encoded$FastingBS_1)
+df_encoded$RestingECG_ST <- as.factor(df_encoded$RestingECG_ST)
+df_encoded$RestingECG_Normal <- as.factor(df_encoded$RestingECG_Normal)
+df_encoded$ExerciseAngina_Y <- as.factor(df_encoded$ExerciseAngina_Y)
+df_encoded$ST_Slope_Up <- as.factor(df_encoded$ST_Slope_Up)
+df_encoded$ST_Slope_Flat <- as.factor(df_encoded$ST_Slope_Flat)
+
+# Create a scaler and fit it on the numerical features of the training data
+preProc <- preProcess(df_encoded[, sapply(df_encoded, is.numeric)], method = "scale")
+
+# Use the scaler to transform the numerical features of the entire dataset
+df_scaled_encoded <- predict(preProc, newdata = df_encoded)
+
+# Now you can split the data and fit your models as before
+index2 <- createDataPartition(df_scaled_encoded$HeartDisease_1, p=0.8, list=FALSE)
+train_set2 <- df_scaled_encoded[index2, ]
+test_set2 <- df_scaled_encoded[-index2, ]
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+# Logistic regression
+
+# Fit the logistic regression model
+log_model2 <- glm(HeartDisease_1 ~ ., data = train_set2, family = "binomial")
+
+# Summarize the model
+summary(log_model2)
+
+##
+
+# Fit the full model
+full_model <- glm(HeartDisease_1 ~ ., family = "binomial", data = train_set2)
+
+# Perform backward selection
+reduced_model <- step(full_model, direction = "backward")
+
+
+##
+
+# Make predictions on the test data
+log_probabilities2 <- predict(reduced_model, newdata = test_set2, type = "response")
+log_predictions2 <- ifelse(log_probabilities2 > 0.5, 1, 0)
+
+# View confusion matrix
+cmlog3 = confusionMatrix(as.factor(log_predictions2), test_set2$HeartDisease_1)
+
+accuracylog3 <- cmlog3$overall["Accuracy"]
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+# SVM
+
+# Define training control
+train_control <- trainControl(method="cv", number=5)  # 5-fold CV
+
+# Train the model with Cross-validation
+svm_model_cv2 <- train(HeartDisease_1 ~ ., data=train_set2, 
+                      trControl=train_control, method="svmRadial")
+
+
+# Make predictions on the test data
+svm_predictions2 <- predict(svm_model_cv2, newdata = test_set2)
+
+# Now this should work
+cmsvm3 = confusionMatrix(as.factor(svm_predictions2), test_set2$HeartDisease_1)
+
+accuracysvm3 <- cmsvm3$overall["Accuracy"]
+
+
+
+# Random forest
+
+# Fit the random forest model
+rf_model2 <- randomForest(HeartDisease_1 ~ ., data = train_set2)
+
+# Make predictions on the test data
+rf_predictions2 <- predict(rf_model2, newdata = test_set2)
+
+# Evaluate the model
+cmrf3 = confusionMatrix(as.factor(rf_predictions2), as.factor(test_set2$HeartDisease_1))
+
+accuracyrf3 <- cmrf3$overall["Accuracy"]
+
+```
+
+**Pre-processing steps**
+
+For the modelling section of the research, various pre-processing techniques were implemented in order to produce a more reliable, thorough analysis. The datasets were divided into training and testing sets for each version, and the three aforementioned algorithms were evaluated on each version to produce a total of nine models. The initial version had essentially no changes from the original dataset. The dataset was subjected to one-hot encoding in the second edition. The dataset was subjected to one-hot encoding and scaling in the third edition. This is done to see whether there are any differences in how different pre-processing processes affect a model's ability to predict outcomes accurately.
+
+**One-hot encoding**
+
+For each categorical variable or label of categorical characteristics, one-hot encoding generates new binary columns. Whilst working with categorical variables, some machine learning algorithms demand numeric inputs, this is a typical preprocessing approach to accommodate that requirement. The initial categorical variables are removed from the dataset after encoding.
+
+These preprocessed data are then used to train various models. The first step is to train an SVM model using 5-fold cross-validation. The performance of this model is then assessed using a confusion matrix after it is used to generate predictions on the test data. The same is done for logistic regression and random forest models where they are fitted and assessed.
+
+**Scaling and One-hot encoding**
+
+The second method follows essentially the same processes as the first, but in addition to one-hot encoding, it scales the numeric variables. This stage is crucial for models like SVM that depend on the size of the variables. A comparable collection of models, including random forest, logistic regression, and SVM with cross-validation, are trained on the preprocessed data after it has been split into training and testing sets. Backward selection of variables is an additional step in the logistic regression part. This step tries to reduce the model by progressively deleting the least significant variable (the one with the highest p-value) and comparing the fit of the smaller model with that of the full model. when progress is no longer possible by removing variables the process halts.
+
+In a manner similar to that described in the section above, the performances of these models are evaluated and contrasted by making forecasts based on test data and comparing those forecasts to the actual findings using a confusion matrix. With this strategy, you can compare all preprocessing techniques in-depth and see how they affect how these machine learning models work. This makes it easier to understand how different preprocessing techniques may impact these models' efficacy, which in turn makes it easier to select the optimum preprocessing technique and model for the dataset at hand. This comparison is illustrated in (Figure 7)
+
+
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.cap="Model performance across different preprocessing approaches: Evaluating the effects of one-hot encoding and feature scaling on logistic regression, random forest, and SVM."}
+
+# Create data frame
+accuracy_data <- data.frame(
+  Model = c(rep("Logistic Regression", 3), rep("Random Forest", 3), rep("SVM", 3)),
+  Preprocessing = rep(c("Original Data", "One-hot encoded", "Scaled & encoded"), 3),
+  Accuracy = c(accuracylog1, accuracylog2, accuracylog3, 
+               accuracyrf1, accuracyrf2, accuracyrf3, 
+               accuracysvm1, accuracysvm2, accuracysvm3)
+)
+
+
+accuracy_data$Preprocessing <- factor(accuracy_data$Preprocessing, 
+                                      levels = c("Scaled & encoded","One-hot encoded","Original Data" ))
+
+
+# Custom color palette
+custom_colors <- c("Original Data" = "darkred", "One-hot encoded" = "darkgreen", "Scaled & encoded" = "gold")
+
+# Modify the data to create a new column for interaction of Model and Preprocessing
+accuracy_data$Model_Preprocessing <- interaction(accuracy_data$Model, accuracy_data$Preprocessing, sep = " - ")
+
+ggplot(accuracy_data, aes(x = Accuracy, y = Model_Preprocessing)) +
+  geom_segment(aes(xend = Accuracy, yend = Model_Preprocessing, color = Preprocessing), x = 0) +
+  geom_point(aes(color = Preprocessing), size = 4) +
+  labs(title = "Model Accuracy Across Different Preprocessing Approaches",
+       x = "Accuracy", y = "Model with Preprocessing") +
+  theme_minimal()+ scale_color_manual(values = custom_colors) + 
+  theme(legend.title = element_blank(),
+        plot.title.position = "plot",
+        plot.title = element_text(hjust = 0.5)) 
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+### Adjusting P-values
+
+# Get predicted probabilities
+predicted_probabilities <- predict(log_model, newdata = test_set1, type = "response")
+
+# Set new threshold
+threshold <- 0.55
+
+# Classify as '1' if predicted probability is greater than threshold, else '0'
+new_predictions <- ifelse(predicted_probabilities > threshold, 1, 0)
+
+confusionMatrix(as.factor(new_predictions), as.factor(test_set1$HeartDisease_1))
+
+
+###
+
+
+
+# ROC for Random Forest
+roc_log_p_new <- roc(test_set1$HeartDisease_1, new_predictions)
+
+# Plot the ROC curve
+plot(roc_log_p_new, main="ROC Curve for log model after new p value")
+# Print the AUC
+cat("AUC for the log model after new p value: ", auc(roc_log_p_new))
+
+
+
+# Random Forest
+rf_probabilities <- predict(rf_model1, newdata = test_set1, type = "prob")
+
+# Since predict gives probabilities for both classes (0 and 1), select probability of class '1'
+rf_probabilities <- rf_probabilities[,2]
+
+rf_predictions_new <- ifelse(rf_probabilities > 0.55, 1, 0)
+
+confusionMatrix(as.factor(rf_predictions_new), as.factor(test_set1$HeartDisease_1))
+
+# ROC for Random Forest
+roc_rf_new <- roc(test_set1$HeartDisease_1, rf_predictions_new)
+
+# Plot the ROC curve
+plot(roc_rf_new, main="ROC Curve for RF model after new p value")
+
+# Print the AUC
+cat("AUC for the RF model after new p value: ", auc(roc_rf_new))
+
+
+
+# Train the model with Cross-validation, with probability estimates
+
+svm_model_cv <- train(HeartDisease_1 ~ ., data=train_set1, 
+                      trControl=train_control, method="svmRadial", 
+                      preProcess = c("center", "scale"), # normalization
+                      tuneLength = 10, # hyperparameter tuning
+                      prob.model = TRUE) # train with probability estimates
+
+# Print the summary
+print(svm_model_cv)
+
+
+
+# Predict with probability estimates
+svm_probabilities <- predict(svm_model_cv, newdata = test_set1, type="prob")
+
+# Extract probabilities for class '1'
+svm_probabilities_1 <- svm_probabilities$'1'
+
+# Adjust threshold and create new predictions
+svm_predictions_new <- ifelse(svm_probabilities_1 > 0.55, 1, 0)
+
+# Convert to factor and explicitly set the levels
+svm_predictions_new <- factor(svm_predictions_new, levels = c('0', '1'))
+
+
+
+# Generate the confusion matrix
+confusionMatrix(as.factor(svm_predictions_new), as.factor(test_set1$HeartDisease_1))
+
+
+# Convert to numeric
+svm_predictions_new_numeric <- as.numeric(as.character(svm_predictions_new))
+test_set_numeric <- as.numeric(as.character(test_set1$HeartDisease_1))
+
+# ROC for SVM
+roc_svm_new <- roc(test_set_numeric, svm_predictions_new_numeric)
+
+# Plot the ROC curve
+plot(roc_svm_new, main="ROC Curve for SVM model after new p value")
+
+# Print the AUC
+cat("AUC for the SVM model after new p value: ", auc(roc_svm_new))
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+### Comparing model peroformance for different subgroups
+
+
+# Split the test set into male and female subsets
+test_set_male <- test_set[test_set$Sex == "M", ]
+test_set_female <- test_set[test_set$Sex == "F", ]
+
+# Get the predicted values for males and females
+predictions_male <- predictions[test_set$Sex == "M"]
+predictions_female <- predictions[test_set$Sex == "F"]
+
+# Convert both to factors with manually defined levels
+predictions_female <- factor(predictions_female, levels = c('0', '1'))
+test_set_female$HeartDisease <- factor(test_set_female$HeartDisease, levels = c('0', '1'))
+
+
+
+
+# Convert both to factors with manually defined levels
+predictions_male <- factor(predictions_male, levels = c('0', '1'))
+test_set_male$HeartDisease <- factor(test_set_male$HeartDisease, levels = c('0', '1'))
+
+
+###
+
+
+evaluate_model_for_subgroup <- function(predictions, test_set, subgroup) {
+  # Extract subgroup from test_set
+  test_set_subgroup <- test_set[test_set$Sex == subgroup, ]
+  
+  # Get the predicted values for the subgroup
+  predictions_subgroup <- predictions[test_set$Sex == subgroup]
+  
+  # Convert both to factors with manually defined levels
+  predictions_subgroup <- factor(predictions_subgroup, levels = c('0', '1'))
+  test_set_subgroup$HeartDisease <- factor(test_set_subgroup$HeartDisease, levels = c('0', '1'))
+  
+  # Run confusion matrix
+  cm <- confusionMatrix(predictions_subgroup, test_set_subgroup$HeartDisease)
+  
+  # Generate ROC curve
+  roc_obj <- roc(as.numeric(as.character(test_set_subgroup$HeartDisease)), 
+                 as.numeric(as.character(predictions_subgroup)))
+  
+  # Print ROC and AUC
+  plot(roc_obj, main=paste("ROC Curve for", subgroup))
+  cat("AUC for the", subgroup, "model: ", auc(roc_obj))
+  
+  return(cm)
+}
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+confusionMatrix(predictions_male, test_set_male$HeartDisease)
+confusionMatrix(predictions_female, test_set_female$HeartDisease)
+```
+
+\break
+
+**Assessing Subgroups**
+
+Predictive modelling should be assessed based on performance across subgroups to ensure balanced analysis of the model and to reduce bias. I separated the patient population into subgroups which initially were only of Male and Female since it is obvious that sex has a significant role in the development of cardiac disease. The goal was to determine if men and women perform predictably equally and, if not, to determine why. Male and female test sets were created from the test data. Table 4 illustrates a confusion Matrix from the caret package which was used to evaluate sex by converting predictions for these subgroups into factor variables. To make the process more effective, it was incorporated into a function. Following the receipt of predictions, the test dataset, and the subgroup identification, this procedure provides a confusion matrix for the specified subgroup. It also determines the Area Under the Curve and generates a ROC curve for additional confirmation.
+
+\newpage
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+
+
+
+# Male matrix and metrics
+male_matrix <- matrix(c(47, 5, 8, 90), 2, byrow = TRUE)
+male_accuracy <- sum(diag(male_matrix)) / sum(male_matrix)
+male_sensitivity <- male_matrix[1,1] / sum(male_matrix[1,])
+male_specificity <- male_matrix[2,2] / sum(male_matrix[2,])
+
+# Female matrix and metrics
+female_matrix <- matrix(c(26, 2, 1, 4), 2, byrow = TRUE)
+female_accuracy <- sum(diag(female_matrix)) / sum(female_matrix)
+female_sensitivity <- female_matrix[1,1] / sum(female_matrix[1,])
+female_specificity <- female_matrix[2,2] / sum(female_matrix[2,])
+
+# Convert matrices to data frames
+male_stats <- as.data.frame(male_matrix)
+female_stats <- as.data.frame(female_matrix)
+
+# Rename columns
+colnames(male_stats) <- c("Reference 0", "Reference 1")
+colnames(female_stats) <- c("Reference 0", "Reference 1")
+
+# Add Prediction column
+male_stats$Prediction <- c(0, 1)
+female_stats$Prediction <- c(0, 1)
+
+# Add accuracy, sensitivity and specificity as new rows and round them
+male_stats <- rbind(male_stats, c(round(male_accuracy, 2), "", "Accuracy"), 
+                   c(round(male_sensitivity, 2), "", "Sensitivity"), 
+                   c(round(male_specificity, 2), "", "Specificity"))
+
+female_stats <- rbind(female_stats, c(round(female_accuracy, 2), "", "Accuracy"), 
+                      c(round(female_sensitivity, 2), "", "Sensitivity"), 
+                      c(round(female_specificity, 2), "", "Specificity"))
+
+# Combine both data frames side by side
+combined_stats <- cbind(male_stats, female_stats[, 1:2])
+colnames(combined_stats) <- c("Male Reference 0", "Male Reference 1", "Metrics", "Female Reference 0", "Female Reference 1")
+
+# Use kable to render the table
+kable(combined_stats, align = c('c', 'c', 'l', 'c', 'c'), booktabs = TRUE, row.names = FALSE, caption = "Confusion Matrix: Males vs Females") %>%
+  kable_styling()
+
+
+```
+
+It also determines the Area Under the Curve and generates a ROC curve for additional confirmation.
+
+In this investigation, the model performed a little bit better for males (AUC = 0.90) than for women (AUC = 0.81). The distribution of other predictor variables or differences in the prevalence of heart disease based on gender may be the cause of this discrepancy. The dataset has a higher proportion of males (725) than women (193) and men have a higher frequency of heart disease (458) than women (50), which demonstrates a significant example of class disparity. This imbalance presumably has an effect on how the model performs across subgroups.
+
+Due to unbalanced datasets, machine learning algorithms are unable to learn the characteristics of underrepresented classes. Because the pool was larger for the model to make draws from, it probably caused it to perform better for males. Even though both groups had high AUCs, the lower AUC for females points to a lower level of predictive ability. The confusion matrix for both groups shows high accuracy as shown in (Table 4), but due to class imbalances, accuracy isn't the best performance indicator in this situation. Males showed higher model sensitivity, indicating better positive case detection, an important aspect of medical diagnosis.
+
+# PCA and Pre-clustering
+
+Applying the Elbow plot, a within-cluster sum of squares (WSS) metric was utilized to establish the ideal number of clusters for the dataset. The WSS for a k range between 1 and 10 was measured for each iteration of the k-means clustering. For each experiment up to 15 iterations and 50 randomly chosen starting positions were used. On a line graph displaying the data, the number of clusters and the WSS were shown. The optimal cluster number (3 clusters) was determined to be at the "elbow" of the plot, where adding clusters has no effect on WSS. Condensing the clusters while reducing model complexity is the goal of this technology.
+
+As a first step in creating prediction models, K-means was first employed to cluster the dataset. Due to the datas high dimensionality, utilizing it as-is for clustering might provide mediocre groups. PCA, or Principal Component Analysis, was used in the analysis to shed light on the best course of action. By determining the dimensions or "principal components" that contain the most variation, PCA is a dimensionality reduction approach that lessens the complexity of any dataset. After scaling the data, the first two principal components were computed and shown. The k-means clusters were color-coded for clarity.
+
+This method was replicated using the second clustering technique known as hierarchical clustering. Figure 8 shows when the PCA plots for both clustering techniques were visually analysed, the hierarchical clusters showed greater separation with less overlap than the k-means clusters. This discovery revealed that hierarchical clustering would offer more distinct cluster groupings leadeing to prediction models that were more interpretable.
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+## Clustering
+set.seed(12)
+## Kmeans
+
+dummies_model <- dummyVars(HeartDisease ~ ., data=df)
+dataset_numeric <- data.frame(predict(dummies_model, newdata = df))
+# Perform PCA
+pca_result <- prcomp(scaled_data)
+
+k <- kmeans(dataset_numeric, centers=3)  # 3 clusters
+
+
+df$cluster <- as.factor(k$cluster)
+
+
+
+# Split data into train and test sets
+
+splitIndex <- createDataPartition(df$HeartDisease, p=0.8, list=FALSE)
+train_set3 <- df[splitIndex, ]
+test_set3 <- df[-splitIndex, ]
+
+
+# Visualizing the data using the first two principal components
+pca_data <- as.data.frame(pca_result$x)
+pca_data$cluster <- df$cluster  # Add cluster information to the PCA data
+
+# Plotting the first two principal components
+
+pc1=ggplot(pca_data, aes(x=PC1, y=PC2, color=as.factor(cluster))) +
+  geom_point() +
+  labs(color="Cluster") +
+  ggtitle("K-means clustering")
+
+```
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+## Hierchichal
+
+# Assuming the scaled data is stored in a variable called scaled_data
+d <- daisy(scaled_data, metric = "gower")
+fit <- hclust(d)
+
+# Cut tree into k clusters
+k <- 3 # or another number based on the domain knowledge or dendrogram analysis
+clusters_hierarchical <- cutree(fit, k)
+
+# Add the new cluster assignments back to the original data
+df$cluster_hierarchical <- clusters_hierarchical
+
+
+
+# Visualizing the data using the first two principal components
+pca_data <- as.data.frame(pca_result$x)
+pca_data$clusterh <- df$cluster_hierarchical  
+
+
+# Plotting the first two principal components
+
+pc2=ggplot(pca_data, aes(x=PC1, y=PC2, color=as.factor(clusterh))) +
+  geom_point() +
+  labs(color="Cluster") +
+  ggtitle("Hierarchical clustering")
+
+
+
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.cap="First two principle components plotted and seperated by cluster to showcase distinction in cluster assignments"}
+# Combine the plots side by side with a main title and two subtitles
+grid.arrange(pc1, pc2, ncol = 2, 
+             top = textGrob("PCA Plot of First Two Principal Components", gp = gpar(fontsize = 16, fontface = "bold")),
+             bottom = textGrob("", gp = gpar(fontsize = 12)))
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+# Summary statistics for hierarchical clusters
+aggregate(.~ cluster_hierarchical, data=df, mean) # for new cluster summaries
+
+# Assuming the finalized cluster column is named 'cluster_hierarchical'
+trainIndex4 <- sample(1:nrow(df), 0.8 * nrow(df))
+train_set4 <- df[trainIndex4, ]
+test_set4 <- df[-trainIndex4, ]
+
+
+# Convert cluster_hierarchical to factor
+train_set4$cluster_hierarchical <- as.factor(train_set4$cluster_hierarchical)
+test_set4$cluster_hierarchical <- as.factor(test_set4$cluster_hierarchical)
+
+# Fit the Random Forest model on the training data
+rf_model_kmeans <- randomForest(cluster ~ ., data=train_set3, ntree=100)
+
+# Make predictions on the test data
+predictions_kmeans <- predict(rf_model_kmeans, newdata=test_set3)
+
+# Build Random Forest Model
+rf_model <- randomForest(cluster_hierarchical ~ ., data=train_set4, ntree=100)
+
+# Predict on test data
+predictions <- predict(rf_model, newdata=test_set4)
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+
+confusionMatrix(predictions,test_set4$cluster_hierarchical)
+# Evaluate the model
+confusionMatrix(predictions_kmeans, test_set3$cluster)
+```
+
+As evidence, cluster assignments were predicted using random forest models for both approaches. Random Forest was selected due to its advantages against overfitting and capacity for large dimensional datasets. The performance of the models was evaluated by constructing the confusion matrix for the expected and actual cluster assignments. The k-means model outperformed the hierarchical model by a small margin. This result contradicted the concept of our first PCA plot (Figure 8). This demonstrates the need of linking quantitative measures with interpretations of qualitative data. Because k-means uses Euclidean distance, which is not ideal for categorical variables, there is only a slight variation in performance (Accuracy). The initial conclusion of using hierarchical clustering remains.
+
+The results indicate how useful PCA is for emphasizing the underlying structure of the data and guiding the selection of the most appropriate clustering method. This procedure also showed how combining clustering techniques with dimensionality reduction techniques and predictive modelling may be advantageous for predictive analytics projects. Future research may benefit from examining the use of additional dimensionality reduction techniques when used with clustering algorithms to increase the effectiveness of predictive modelling.
+
+# Clustering
+
+It is typical practise when using predictive modelling to assess model performance across the board and within particular clusters of the data. Particularly for datasets that are diverse in a number of dimensions, this issue is significant. By breaking down assessment into different clusters, it is simpler to comprehend how the model performs on particular subgroups and enhance the model's performance. In this study, I use a prediction model created to evaluate the risk of heart disease as an example of one such strategy.
+
+I had created a prediction model using many patient variables to forecast instances of heart disease. Despite the fact that the model performed well on the entire test set of data, I used the data to examine the model's performance across different hierarchical clusters. After preliminary assessments, hierarchical clustering was used to separate the data into clusters. The clustering process integrated the Gower metric to efficiently handle both categorical and numerical variables. The elbow plot and dendrogram analysis results led to the division of the dendrogram tree into three clusters (k=3). Those clusters were then assigned back to the original data, and named as a new variable.
+
+Understanding the model's performance on each cluster independently was the main objective. A logistic regression model, a random forest model, and a support vector machine (SVM) model were used to fit the training data for each cluster, and predictions were generated for each cluster. For logistic regression and SVM, metrics like accuracy and the Akaike Information Criterion (AIC) were computed. While accuracy provided a more straightforward understanding of the model complexity than AIC, a measure of the relative quality of statistical models, accuracy provided insight into how well the model predicted instances of heart disease.
+
+The out-of-bag (OOB) error for the random forest model, a type of cross-validation approach specific to the random forest model, gave an objective assessment of the model error in addition to accuracy.
+
+
+## **Cluster attributes**
+
+Cluster 1: Younger, Healthy Individuals
+
+-   The Average age is approximately 47, which is the youngest among the three clusters.
+
+-   Patients have a Chest Pain Type score of about 2.12, which is the highest among the clusters, indicating they experience less severe types of chest pain.
+
+-   Resting Blood Pressure and Cholesterol levels are relatively lower, suggesting better cardiovascular health.
+
+-   Their Max Heart Rate during exercise is the highest among the clusters, again indicating better cardiovascular health.
+
+-   This cluster has the lowest Oldpeak value, which means they have less exercise-induced ST depression, another indicator of good heart health.
+
+-   This group has the lowest Heart Disease score (1.23), suggesting a lower prevalence of heart disease compared to the other clusters.
+
+Cluster 2: Older Individuals with Medium Risk
+
+-   Average age is approximately 57, which is higher than Cluster 1.
+
+-   This group experiences more severe types of chest pain (Chest Pain Type score: 1.65).
+
+-   They have a higher Resting Blood Pressure and slightly lower Cholesterol level compared to Cluster 1.
+
+-   Their Max Heart Rate during exercise is significantly lower than Cluster 1, indicating potential cardiovascular issues.
+
+-   This cluster has a higher Oldpeak value, indicating more exercise-induced ST depression and thus potentially higher risk of heart issues.
+
+-   The Heart Disease score for this group is 1.65, which is higher than Cluster 1, suggesting a medium level of heart disease prevalence.
+
+Cluster 3: High Risk Individuals
+
+-   Average age is around 56, similar to Cluster 2.
+
+-   This group experiences the most severe types of chest pain (Chest Pain Type score: 1.52).
+
+-   They have comparable Resting Blood Pressure to Cluster 1 but with much lower Cholesterol level, which may due to medical treatment for diagnosed heart conditions.
+
+-   Their Max Heart Rate during exercise is the lowest among the clusters, indicating serious cardiovascular health issues.
+
+-   This cluster has the highest Oldpeak value, indicating the most significant exercise-induced ST depression and therefore the highest risk of heart disease.
+
+-   The Heart Disease score for this group is highest at 1.88, suggesting a high prevalence of heart disease.
+
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE,fig.cap="Iterative loops testing three model types on three clusters and assessing the performance with accuracy and margin of error."}
+# Set number of iterations
+n_iter <- 100
+
+# Create an empty data frame to store results
+results <- data.frame(Iteration = integer(), Cluster = integer(), Model = character(), Accuracy = numeric())
+
+# Perform n_iter iterations
+for (iter in 1:n_iter) {
+  
+  # Split data into train and test sets
+  set.seed(iter) # change the seed at each iteration to get different splits
+  splitIndex <- createDataPartition(df$HeartDisease, p=0.8, list=FALSE)
+  train_set3 <- df[splitIndex, ]
+  test_set3 <- df[-splitIndex, ]
+  
+  # Fit and assess model for each cluster
+  for (i in sort(unique(df$cluster))) {
+    
+    train_set_cluster <- train_set3[train_set3$cluster == i, ]
+    test_set_cluster <- test_set3[test_set3$cluster == i, ]
+    
+    # Exclude 'cluster' variable
+    train_set_cluster$cluster <- NULL
+    test_set_cluster$cluster <- NULL
+    
+    # Fit the model
+    log_model <- glm(HeartDisease ~ ., family="binomial", data=train_set_cluster)
+    
+    # Make predictions
+    predictions <- predict(log_model, newdata=test_set_cluster, type="response")
+    
+    # Convert predictions to binary outcome
+    predictions_bin <- ifelse(predictions > 0.5, 1, 0)
+    
+    # Compute accuracy
+    accuracy <- sum(predictions_bin == test_set_cluster$HeartDisease) / nrow(test_set_cluster)
+    
+    # Add results to the data frame
+    results <- rbind(results, data.frame(Iteration = iter, Cluster = i, Model = "Logistic Regression", Accuracy = accuracy))
+    
+    # Fit the Random Forest model
+    rf_model <- randomForest(HeartDisease ~ ., data=train_set_cluster, importance=TRUE)
+    
+    # Make predictions
+    predictions_rf <- predict(rf_model, newdata=test_set_cluster)
+    
+    # Compute accuracy
+    accuracy_rf <- sum(predictions_rf == test_set_cluster$HeartDisease) / nrow(test_set_cluster)
+    
+    # Add results to the data frame
+    results <- rbind(results, data.frame(Iteration = iter, Cluster = i, Model = "Random Forest", Accuracy = accuracy_rf))
+    
+    # Fit the SVM model
+    svm_model <- svm(HeartDisease ~ ., data=train_set_cluster, kernel = "radial", cost = 10, scale = FALSE)
+    
+    # Make predictions
+    predictions_svm <- predict(svm_model, newdata=test_set_cluster)
+    
+    # Compute accuracy
+    accuracy_svm <- sum(predictions_svm == test_set_cluster$HeartDisease) / nrow(test_set_cluster)
+    
+    # Add results to the data frame
+    results <- rbind(results, data.frame(Iteration = iter, Cluster = i, Model = "SVM", Accuracy = accuracy_svm))
+  }
+}
+
+# Create a mapping for cluster names
+cluster_names <- c(
+  "1" = "Young-Healthy ",
+  "2" = "Old-Medium Risk",
+  "3" = "High-Risk"
+)
+
+# Create a color mapping for each model 
+model_colors <- c(
+  "Logistic Regression" = "darkred",
+  "Random Forest" = "darkgreen",
+  "SVM" = "gold"
+)
+
+# Calculate average accuracy and standard error for each model and cluster
+avg_results <- results %>%
+  group_by(Model, Cluster) %>%
+  summarise(Avg_Accuracy = mean(Accuracy),
+            SE_Accuracy = sd(Accuracy) / sqrt(n()),
+            .groups='keep') %>%
+  mutate(Cluster_Name = factor(cluster_names[as.character(Cluster)], levels = cluster_names))
+
+# Plot the average accuracy with error bars
+ggplot(avg_results, aes(x=Cluster_Name, y=Avg_Accuracy, fill=Model)) +
+  geom_bar(stat="identity", position=position_dodge(), aes(fill = Model)) +
+  scale_fill_manual(values = model_colors) +
+  geom_errorbar(aes(ymin=Avg_Accuracy-SE_Accuracy, ymax=Avg_Accuracy+SE_Accuracy), 
+                position=position_dodge(0.9), width=0.2) +
+  labs(x="Cluster", y="Average Accuracy", title="Average Model Performance by Cluster with Error Bars") +
+  theme_minimal()
+
+```
+
+Figure 9 shows the findings, it was discovered that the accuracy and AIC values for the logistic regression model differed amongst the clusters. This variant proves that the model handled various clusters with varied degrees of success. The same results were also apparent for the random forest and SVM models with varying degrees of fluctuating between clusters.
+
+For instance, clusters 2 and 3 had the highest accuracy of the logistic regression model and the lowest accuracy for cluster 1. Similar results were shown with the random forest model, which had the best accuracy on clusters 2 and 3. SVM, however performed best for cluster 3 and 1. Since clusters differ inherently in terms of both the target variable distribution and the predictor factors, this variation in performance measures may be sensible.
+
+In the aim of ensuring robustness and efficacy, this paper highlighted the significance of evaluating predictive model performance across several clusters. By doing this, possible areas for improvement can be identified which will lead to a better understanding of how a model will perform on various demographic groups. To prevent over generalization and boost predictive prowess, the developers of predictive models ought to include such cluster-based assessments as a standard component of model evaluation expemplified by (Figure 9).
+
+
+
+```{r,warning=FALSE,message=FALSE,include=FALSE, results='asis'}
+# Convert avg_results to a matrix
+avg_results_matrix <- data.matrix(avg_results[, -c(1, 2)])  # exclude the factor columns
+rownames(avg_results_matrix) <- paste(avg_results$Model, avg_results$Cluster, sep = "_")  # create unique row names
+
+# Use stargazer function
+stargazer(avg_results_matrix,
+          type = 'latex',
+          header = F,
+          title = "Average Results Summary",
+          rownames = TRUE,
+          digits=2)
+
+
+
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+##
+
+# Compute and plot wss for k = 2 to k = 10
+k.max <- 10
+wss <- sapply(1:k.max, 
+              function(k){kmeans(df_encoded, k, nstart=50, iter.max = 15 )$tot.withinss})
+
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+# Attempt to sort cluster by attributes
+
+# Calculate the mean of each numeric attribute for each cluster
+numeric_vars <- sapply(df, is.numeric)
+mean_by_cluster <- aggregate(df[numeric_vars], by=list(df$cluster), mean)
+
+# Calculate the mode of each categorical attribute for each cluster
+categorical_vars <- sapply(df, is.factor)
+mode_by_cluster <- lapply(df[categorical_vars], function(x) tapply(x, df$cluster, function(x) names(which.max(table(x)))))
+
+# Combine both data frames into one for easy viewing
+attributes_by_cluster <- cbind(mean_by_cluster, mode_by_cluster)
+
+
+# Cluster summaries
+
+# Summary statistics for Cluster 1
+print("Summary Statistics for Cluster 1")
+summary(df[df$cluster == 1,])
+
+# Summary statistics for Cluster 2
+print("Summary Statistics for Cluster 2")
+summary(df[df$cluster == 2,])
+
+# Summary statistics for Cluster 3
+print("Summary Statistics for Cluster 3")
+summary(df[df$cluster == 3,])
+
+```
+
+```{r,warning=FALSE,message=FALSE,include=FALSE}
+## lasso
+
+full_model <- glm(HeartDisease_1 ~ ., data = train_set2, family = binomial)
+step_model <- stepAIC(full_model, direction = "backward")
+summary(step_model)
+
+# Make predictions on the validation set
+step_model_preds_prob <- predict(step_model, newdata = test_set2, type = "response")
+step_model_preds <- ifelse(step_model_preds_prob > 0.5, 1, 0)
+
+# Compute performance metrics
+step_model_accuracy <- sum(step_model_preds ==
+                             test_set2$HeartDisease_1) / nrow(test_set2)
+step_model_auc <- pROC::auc(pROC::roc(test_set2$HeartDisease_1, 
+                                      step_model_preds_prob))
+
+
+
+
+
+x_train <- model.matrix(HeartDisease_1 ~ ., data = train_set2)[, -1]
+y_train <- train_set2$HeartDisease_1
+
+x_val <- model.matrix(HeartDisease_1 ~ ., data = test_set2)[, -1]
+y_val <- test_set2$HeartDisease_1
+
+lasso_model <- glmnet(x_train, y_train, family = "binomial", alpha = 1)
+cv.lasso <- cv.glmnet(x_train, y_train, family = "binomial", alpha = 1)
+best_lambda <- cv.lasso$lambda.min
+
+# Make predictions on the validation set
+lasso_model_preds_prob <- predict(lasso_model, newx = x_val, 
+                                  s = best_lambda, type = "response")
+lasso_model_preds <- ifelse(lasso_model_preds_prob > 0.5, 1, 0)
+
+# Compute performance metrics
+lasso_model_accuracy <- 
+  sum(lasso_model_preds == 
+        test_set2$HeartDisease_1) / nrow(test_set2)
+lasso_model_auc <- pROC::auc(pROC::roc(test_set2$HeartDisease_1, 
+                                       lasso_model_preds_prob))
+
+
+# Print out the metrics for comparison
+cat("Stepwise selection logistic regression - Accuracy: ", 
+    step_model_accuracy, " AUC: ", step_model_auc, "\n")
+cat("Lasso logistic regression - Accuracy: ", lasso_model_accuracy, 
+    " AUC: ", lasso_model_auc, "\n")
+
+```
+
+\newpage
+
+# **Communicating data with interactive app**
+
+**Shiny app link : https://hqapp2.shinyapps.io/Heartapp2/**
+
+
+
+This paper seeks to make the findings of the study accessible to both specialists and non-experts in a straightforward and efficient manner. Shiny, an interactive web application available in R, was utilized to accomplish this goal. It is a powerful tool for building interactive apps right in the R environment. This serves as foundation of the data communication aspect of this research. The app presents the visual output of most important conclusions made from the study in an effort to effectively convey the research findings. This exemplifies how different methods and ideas used throughout the study to predict heart disease interact with one another.
+
+
+![The app interface.](/Users/hassanainqazzaz/Downloads/C5.png)
+
+A user interface (UI) is required as the base to develop an interactive programme, shown in (Figure 10). In order for any user to browse with ease, it was crucial to make sure the user interface (UI) was easy to use and intuitive. Users can enter vital patient data in the input fields on the sidebar, which include the patient's age, sex, type of chest pain, resting blood pressure, cholesterol level, fasting blood sugar, resting ECG, maximum heart rate, exercise-induced angina, old peak, and ST slope. The UI consists of two main components: the left sidebar and the main window.
+
+\break
+
+![Interactive predicted risk of heart disease](/Users/hassanainqazzaz/Downloads/C1.png)
+
+In the primary section of the interface, which also acts as the output display, the forecast result of the model is shown through visual representation and numerical outputs. The display includes two complementary plots, the patient's predicted cluster and risk of developing heart disease, as well as the predicted cluster's distribution of risks by cluster and the relationship between age and risk of developing heart disease shown in (Figure 11). While the second plot is interactive and input-based, the first plot is fixed. The "Cerulean" motif is applied to create a straightforward yet eye-catching design.
+
+![Interactive predicted cluster assignment and respective cluster description](/Users/hassanainqazzaz/Downloads/C2.png)
+
+The app's strength is shown in the server function. In order to generate forecasts and create visualizations, it is where all algorithms and computations are merged. Reactive values are created in relation to the patient's data, and these values then create a new data frame in reaction to user input. This responsiveness ensures that the forecasts and visualizations are dynamically updated when users change their input. The dataset's risk was assessed using the random forest model, which also produced a density map of the expected risk for each cluster in the main panel. By providing a detailed overview of the distribution of risk across multiple patient subgroups, this map provides a comparative context for individual patient risk projections.
+
+After that, a prediction is calculated to determine which cluster a new patient will belong to. Intricate hierarchical clustering and selecting the cluster based on the least average connectivity were done using the AGNES technique. The predicted cluster is then displayed in the main panel along with its name and a brief explanation, making it simple for non-experts to comprehend the result shown in (Figure 12). Additionally, the new patient's likelihood of acquiring heart disease is predicted using the random forest model. The expected risk is represented by a percentage in this.
+
+However, to give the user a more comprehensive understanding of the patient's risk, a supplemental section of the main panel includes a scatter plot of age vs. estimated risk of heart disease, shown in (Figure 13). This plot, which provides a visual representation of the patient's risk in proportion to the entire dataset, highlights the age and danger of the new patient. The new patient is represented as a red point on the plot that shifts vertically and horizontally depending on risk and age. In addition, a circle surrounds the point, signifying the prediction's error margin, which can be changed depending on the input.
+
+\newpage
+
+![Interactive plot showing new patient's risk and margin of error](/Users/hassanainqazzaz/Downloads/C3.png)
+
+The app's goal was to transfer all technical analyses into a dynamic, interactive channel of communication that non-technical people could use to interact with it and get real-time forecasts for probable new circumstances. By using complex visualizations like the density and scatter plots, improved understanding of these predictions was achieved by providing a clear, comparative context. This study provides a concrete illustration of how interactive data visualization and predictive modelling may be used to create trustworthy, beneficial applications in the healthcare industry. Similar methodologies may result in greatly enhanced diagnostic procedures, better individualized patient care, and generally enhanced healthcare services.
+
+
+
+# **Limitations**
+
+The study was fruitful with results, some expected some not, however it wasn't free of limitations and roadblocks. Primarily, the source of data was vague with no information available on the collection methods, hospitals, procedures nor purpose of studies conducted, which made all measurements and variables be taken with a grain of salt. Secondary, due to the length constraints of the thesis, much analysis remains to be done and new concepts to be explored which leaves this work as good foundation to build upon. Tertiary, the shiny app domain being a free service mandated a limit on the CPU and memory usage the app can use. As such, the app had to be dramatically trimmed down which left many plots, numerical outputs, and visual adjustments to be left out.
+
+
+# **Conclusion**
+
+
+This paper introduced a wide range of advanced statistical methods and approaches, set out to a comprehensive exploration of the intricate relationships of heart disease predictors. Furthermore, the analysis methodically constructed a solid dataset, ready for rigorous analysis, by first utilizing data pre-processing techniques including clustering and Principal Component Analysis (PCA). Under multiple pre-processing approaches (One-hot encoding and scaling) and multiple assessment criteria (ROC, AIC,Residuals) three main algorithms were tested. To a surprising finding, the logistic regression performed equally or even better than the black-box methods used for comparison (Random forest & SVM). This finding serves both interpretability and resource allocation as the logistic model is the simplest of the three and easiest to interpret. Initially a logistic model with all the variables was fitted to percieve the relationship of the variables to the outcome, however for the final in-app prediction a tuned stepwise model was used. 
+
+The primary analytical instrument, the logistic regression algorithm provided interesting findings, from the distinct impact of gender on heart disease risk to the subtleties of various types of chest discomfort and its implications. The model performed well according to diagnostic tests with the residuals showing some skewness,suggesting room for improvement. By addressing these slight differences, we may be able to improve our model's predictive prowess and increase its value as a tool for medical professionals.
+
+Additionally, by using methods to alter p-values, the model's inferences were made to be both statistically and clinically useful. These rigorous validation procedures highlight the research's dedication to empirical rigor. The Shiny app, designed as the study's application, summaries the research's key findings in a way that makes them simple to access and understand for healthcare practitioners.
+
+ 
+
+To conclude, this analysis made major strides in understanding and predicting the drivers of heart disease, however, it also emphasizes the value of further research. The quest to completely understand cardiac disease is continuing due to the meshing of biology, environment, and possibly still unidentified variables. Nevertheless,  the groundwork established in this thesis could be used as foundation to future initiatives which keep advancing in the direction of more precise, implementable, and patient-centered solutions in the fight against heart disease.
+
+
+
+
+
+
+\newpage
+
+# **Bibliography**
+
+
+Ahmad, T., Lund, L. H., Rao, P., et al. (2018). Machine Learning Methods Improve Prognostication, Identify Clinically Distinct Phenotypes, and Detect Heterogeneity in Response to Therapy in a Large Cohort of Heart Failure Patients. Journal of the American Heart Association, 7(8), e008081.
+
+Benjamin E.J., Muntner P., Alonso A. et al. (2019). Heart Disease and Stroke Statistics-2019 Update: A Report From the American Heart Association. Circulation, 139(10):e56-e528.
+
+Bleumink, G. S., Knetsch, A. M., Sturkenboom, M. C. et al. (2004). Quantifying the heart failure epidemic: prevalence, incidence rate, lifetime risk and prognosis of heart failure The Rotterdam Study. European Heart Journal, 25(18), 1614–1619.
+
+Borlaug, B. A. (2014). The pathophysiology of heart failure with preserved ejection fraction. Nature reviews. Cardiology, 11(9), 507–515.
+
+Cannon, B. (2013). Cardiovascular disease: Biochemistry to behaviour. Nature, 493, S2–S3. https://doi.org/10.1038/493S2a
+
+Cleveland Clinic. (2020). Types of Heart Disease. Cleveland Clinic.
+
+Drazner, M. H. (2011). The progression of hypertensive heart disease. Circulation, 123(3), 327-334.
+
+Dunlay, S. M., Roger, V. L., & Redfield, M. M. (2017). Epidemiology of heart failure with preserved ejection fraction. Nature Reviews Cardiology, 14(10), 591-602.
+
+Eriksson, H., Svärdsudd, K., Larsson, B., et al. (2005). Risk factors for heart failure in the general population: The study of men born in 1913. European Heart Journal, 6(7), 647-656.
+
+Falk, E. (2011). Pathogenesis of atherosclerosis. Journal of the American College of Cardiology, 47(8 Suppl), C7-12.
+
+Fihn, S. D., Gardin, J. M., Abrams, J., et al. (2012). 2012 ACCF/AHA/ACP/AATS/PCNA/SCAI/STS Guideline for the Diagnosis and Management of Patients With Stable Ischemic Heart Disease. Journal of the American College of Cardiology, 60(24), e44-e164.
+
+Hunt, S. A., Abraham, W. T., Chin, M. H., et al. (2009). 2009 focused update incorporated into the ACC/AHA 2005 Guidelines for the Diagnosis and Management of Heart Failure in Adults. Journal of the American College of Cardiology, 53(15), e1–e90.
+
+Inglis, S. C., Clark, R. A., McAlister, F. A., et al. (2010). Structured telephone support or telemonitoring programmes for patients with chronic heart failure. Cochrane Database of Systematic Reviews, 2010(8).
+
+Januzzi, J. L., Camargo, C. A., Anwaruddin, S., et al. (2006). The N-terminal Pro-BNP Investigation of Dyspnea in the Emergency department (PRIDE) study. The American Journal of Cardiology, 95(8), 948-954.
+
+Knuuti, J., Wijns, W., Saraste, A., et al. (2020). 2019 ESC Guidelines for the diagnosis and management of chronic coronary syndromes. European Heart Journal, 41(3), 407-477.
+
+Lauer, M. S., Francis, G. S., Okin, P. M., Pashkow, F. J., Snader, C. E., & Marwick, T. H. (1999). Impaired heart rate response to graded exercise: prognostic implications of chronotropic incompetence in the Framingham Heart Study. Circulation, 99(8), 1029-1036.
+
+Levy, D., Kenchaiah, S., Larson, M. G., et al. (2002). Long-term trends in the incidence of and survival with heart failure. New England Journal of Medicine, 347(18), 1397-1402.
+
+Mensah, G. A., & Brown, D. W. (2007). An overview of cardiovascular disease burden in the United States. Health affairs, 26(1), 38-48.
+
+Nishimura, R. A., Otto, C. M., Bonow, R. O., et al. (2017). 2017 AHA/ACC Focused Update of the 2014 AHA/ACC Guideline for the Management of Patients With Valvular Heart Disease: A Report of the American College of Cardiology/American Heart Association Task Force on Clinical Practice Guidelines. Journal of the American College of Cardiology, 70(2), 252-289.
+
+Owan, T. E., & Redfield, M. M. (2005). Epidemiology of diastolic heart failure. Progress in cardiovascular diseases, 47(5), 320-332.
+
+Ponikowski, P., Voors, A. A., Anker, S. D., et al. (2016). 2016 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. European Heart Journal, 37(27), 2129-2200.
+
+Rajpurkar, P., Irvin, J., Ball, R. L., Zhu, K., Yang, B., Mehta, H., ... & Langlotz, C. P. (2017). Deep learning for chest radiograph diagnosis: A retrospective comparison of the CheXNeXt algorithm to practicing radiologists. PLoS medicine, 15(11), e1002686.
+
+Reddy, Y. N., & Borlaug, B. A. (2016). Heart Failure With Preserved Ejection Fraction. Current problems in cardiology, 41(4), 145-88.
+
+Roger, V. L. (2013). Epidemiology of Heart Failure. Circulation Research, 113(6), 646–659.
+
+Savarese, G., & Lund, L. H. (2017). Global Public Health Burden of Heart Failure. Cardiac failure review, 3(1), 7–11.
+
+Steinhubl, S. R., Muse, E. D., & Topol, E. J. (2015). Can mobile health technologies transform health care? JAMA, 310(22), 2395-2396.
+
+Wijeysundera, H. C., Norris, C., Van Walraven, C., Bennell, M. C., Yang, H., Krahn, M., ... & Ko, D. T. (2010). Relationship between initial health care provider and referral for coronary angiography in patients investigated for chest pain. Journal of the American College of Cardiology, 55(25), 2861-2868.
+
+Whelton, P. K., Carey, R. M., Aronow, W. S., et al. (2018). 2017 ACC/AHA/AAPA/ABC/ACPM/AGS/APhA/ASH/ASPC/NMA/PCNA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults. Journal of the American College of Cardiology, 71(19), e127-e248.
+
+World Health Organization. (2021). Cardiovascular diseases (CVDs). WHO.
+
+Yancy, C. W., Jessup, M., Bozkurt, B., et al. (2013). 2013 ACCF/AHA Guideline for the Management of Heart Failure: A Report of the American College of Cardiology Foundation/American Heart Association Task Force on Practice Guidelines. Journal of the American College of Cardiology, 62(16), e147-e239.
+
+
+
+
+\newpage
+
+
+
+# **Appendix**
+
+
+## **Prepartion & EDA**
+
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+library(tidyverse)
+library(GGally)
+library(dplyr)
+library(caret)
+library(e1071)
+library(randomForest)
+library(gbm)
+library(pROC)
+library(gridExtra)
+library(heatmaply)
+library(fastDummies)
+library(ggfortify)
+library(shiny)
+library(clustMixType)
+library(cluster)
+library(plotly)
+library(ggalt)
+library(ggforce)
+library(shinythemes)
+
+# set directory
+setwd("/Users/hq/Downloads")
+
+
+# Read the data
+df = read.csv("heart.csv")
+
+
+
+# Pre-process
+
+df$Sex <- as.factor(df$Sex)
+df$ChestPainType <- as.factor(df$ChestPainType)
+df$RestingECG <- as.factor(df$RestingECG)
+df$ExerciseAngina <- as.factor(df$ExerciseAngina)
+df$ST_Slope <- as.factor(df$ST_Slope)
+df$FastingBS = as.factor(df$FastingBS)
+df$HeartDisease = as.factor(df$HeartDisease)
+
+
+# Select only numeric columns
+numeric_columns <- sapply(df, is.numeric)
+scaled_data <- scale(df[, numeric_columns])
+
+
+categorical_vars <- c("Sex", "ChestPainType", "FastingBS", "RestingECG", "ExerciseAngina", "ST_Slope")
+
+summaries <- lapply(categorical_vars, function(var) {
+  df %>%
+    group_by(HeartDisease, !!sym(var)) %>%
+    summarise(Count = n())
+})
+
+# View summaries
+for (i in 1:length(summaries)) {
+  print(summaries[[i]])
+}
+
+
+# Summaries
+
+summary(df)
+
+correlation_matrix <- cor(df %>% select_if(is.numeric))
+print(correlation_matrix)
+
+
+
+
+# Visualize the data
+
+
+ggplot(df, aes(x=HeartDisease, y=Cholesterol, fill=HeartDisease)) + 
+  geom_boxplot() + theme_minimal() + 
+  labs(title="Cholesterol level by Heart Disease status", 
+       x="Heart Disease status", y="Cholesterol level")
+
+ggplot(df, aes(x=ChestPainType, fill=HeartDisease)) + 
+  geom_bar(position="dodge") + theme_minimal() + 
+  labs(title="Heart Disease by Chest Pain Type", x="Chest Pain Type", y="Count")
+
+
+
+# RestingBP by heart disease
+
+ggplot(df, aes(x=HeartDisease, y=RestingBP, fill=HeartDisease)) + 
+  geom_boxplot() + theme_minimal() + 
+  labs(title="Resting Blood Pressure by Heart Disease status", 
+       x="Heart Disease status", y="Resting blood pressure")
+
+
+
+###
+
+
+
+# histogram for age distribution
+p1 <- ggplot(df, aes(x=Age)) +
+  geom_histogram(fill='red', color='black', alpha=0.7) +
+  theme_minimal() +
+  labs(title="Age Distribution", x="Age", y="Count")
+
+# bar plot for heart disease cases by sex
+p2 <- ggplot(df, aes(x=Sex, fill=HeartDisease)) +
+  geom_bar(position='dodge') +
+  theme_minimal() +
+  labs(title="Heart Disease Cases by Sex", x="Sex", y="Count")
+
+# box plot for cholesterol level across different chest pain types
+p3 <- ggplot(df, aes(x=ChestPainType, y=Cholesterol, fill=ChestPainType)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title="Cholesterol Level across Chest Pain Types", x="Chest Pain Type", y="Cholesterol Level")
+
+
+# scatter plot for Age vs MaxHR
+p4 <- ggplot(df, aes(x=Age, y=MaxHR, color=HeartDisease)) +
+  geom_point(alpha=0.6) + geom_smooth(se=F)+
+  theme_minimal() +
+  labs(title="Max Heart Rate vs Age", x="Age", y="Max Heart Rate")
+
+# grid
+grid.arrange(p1, p2, p3, p4, ncol=2)
+
+grid.arrange(p2, p4)
+
+# interactive heatmap:
+
+heatmaply(correlation_matrix)
+
+
+
+
+
+# summary table
+summary_table <- df %>%
+  group_by(HeartDisease) %>%
+  summarise(
+    Mean_Age = mean(Age),
+    Mean_RestingBP = mean(RestingBP),
+    Mean_Cholesterol = mean(Cholesterol),
+    Mean_MaxHR = mean(MaxHR),
+    Mean_Oldpeak = mean(Oldpeak)
+  )
+
+
+print(summary_table) ## Make a stargazer table for this
+
+
+
+###
+
+
+
+# bar plot for each categorical feature
+plot_Sex <- df %>%
+  ggplot(aes(x = Sex, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Sex", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_ChestPainType <- df %>%
+  ggplot(aes(x = ChestPainType, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Chest Pain Type", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_FastingBS <- df %>%
+  ggplot(aes(x = FastingBS, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Fasting Blood Sugar", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_RestingECG <- df %>%
+  ggplot(aes(x = RestingECG, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Resting ECG", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_ExerciseAngina <- df %>%
+  ggplot(aes(x = ExerciseAngina, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "Exercise Induced Angina", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+plot_ST_Slope <- df %>%
+  ggplot(aes(x = ST_Slope, fill = as.factor(HeartDisease))) +
+  geom_bar(position = "dodge") +
+  labs(x = "ST Slope", y = "Count") +
+  scale_fill_discrete(name = "HeartDisease", labels = c("No", "Yes"))
+
+# Combine all plots
+grid.arrange(plot_Sex, plot_ChestPainType, plot_FastingBS, plot_RestingECG, plot_ExerciseAngina, plot_ST_Slope, ncol = 2)
+
+
+```
+
+```{r,warning=FALSE,message=FALSE,eval=TRUE,echo=TRUE}
+# For numerical variables
+ggplot(df, aes(x=Age, fill=HeartDisease)) + 
+  geom_histogram(position="dodge", bins=30) + 
+  theme_minimal() + labs(title="Heart Disease by Age", x="Age", y="Count")
+```
+
+
+## **Modelling, tuning and assessing**
+
+
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+
+
+# Mess around with modelling 
+
+set.seed(123)
+
+# Split the data into  (80%) and (20%) sets
+index <- createDataPartition(df$HeartDisease, p=0.8, list=FALSE)
+train_set <- df[index, ]
+test_set <- df[-index, ]
+
+
+# logistic regression model
+logistic_model <- glm(HeartDisease ~ ., data=train_set, family=binomial())
+
+
+# summary of the model
+summary(logistic_model)
+
+# Predict on the testing set
+predictions <- predict(logistic_model, newdata=test_set, type="response")
+
+# Convert probabilities to binary predictions
+predictions <- ifelse(predictions > 0.5, 1, 0)
+
+# confusion matrix
+confusionMatrix(as.factor(predictions), as.factor(test_set$HeartDisease))
+
+
+##
+
+
+
+##
+
+# Fit the random forest model
+rf_model <- randomForest(HeartDisease ~ ., data = train_set)
+
+# Make predictions on the test data
+rf_predictions <- predict(rf_model, newdata = test_set)
+
+# Evaluate the model
+confusionMatrix(as.factor(rf_predictions), as.factor(test_set$HeartDisease))
+
+
+###
+
+
+
+# Fit the SVM model
+svm_model <- svm(HeartDisease ~ ., data = train_set, kernel = "radial")
+
+# Make predictions on the test data
+svm_predictions <- predict(svm_model, newdata = test_set)
+
+# Evaluate the model
+confusionMatrix(as.factor(svm_predictions), as.factor(test_set$HeartDisease))
+
+
+
+
+### HYPERPARAMETER TUNING
+
+
+# Set up cross-validation
+control <- trainControl(method="cv", number=10)
+
+# Tune the model
+grid <- expand.grid(.mtry=c(1:10)) 
+
+rf_model <- train(HeartDisease ~ ., data=train_set, method="rf", 
+                  trControl=control, tuneGrid=grid)
+
+# Check the best parameters
+print(rf_model$bestTune)
+
+# Make predictions on the test data
+rf_predictions <- predict(rf_model, newdata=test_set)
+
+# Evaluate the model
+confusionMatrix(as.factor(rf_predictions), as.factor(test_set$HeartDisease))
+
+
+
+##
+
+# Set up cross-validation
+control <- trainControl(method="cv", number=10)
+
+# Tune the model
+grid <- expand.grid(.C=c(0.1, 1, 10), .sigma=c(0.1, 1, 10)) 
+
+svm_model <- train(HeartDisease ~ ., data=train_set, method="svmRadial", 
+                   trControl=control, tuneGrid=grid)
+
+# Check the best parameters
+print(svm_model$bestTune)
+
+# Make predictions on the test data
+svm_predictions <- predict(svm_model, newdata=test_set)
+
+# Evaluate the model
+confusionMatrix(as.factor(svm_predictions), as.factor(test_set$HeartDisease))
+
+
+
+
+
+## ROC curves
+
+# Logistic Regression
+log_reg_model <- glm(HeartDisease ~ ., family = binomial(), data = train_set)
+
+# Make predictions 
+log_reg_predictions <- predict(log_reg_model, newdata = test_set, type="response")
+
+
+# Create the ROC curve
+roc_obj <- roc(test_set$HeartDisease, log_reg_predictions)
+
+# Plot the curve
+plot(roc_obj, main="ROC Curve for Logistic Regression")
+
+# AUC
+cat("AUC for the Logistic Regression model: ", auc(roc_obj))
+
+
+
+
+# Random Forest
+rf_model <- randomForest(HeartDisease ~ ., data = train_set)
+rf_predictions <- predict(rf_model, newdata = test_set, type="prob")[,2] 
+
+# ROC for Random Forest
+roc_obj_rf <- roc(test_set$HeartDisease, rf_predictions)
+
+# Plot the ROC curve
+plot(roc_obj_rf, main="ROC Curve for Random Forest")
+# Print the AUC
+cat("AUC for the Random Forest model: ", auc(roc_obj_rf))
+
+
+# SVM
+svm_model <- svm(HeartDisease ~ ., data = train_set, probability = TRUE)
+svm_predictions <- predict(svm_model, newdata = test_set, probability = TRUE)
+svm_predictions <- attr(svm_predictions, "probabilities")[,2]
+
+# ROC for SVM
+roc_obj_svm <- roc(test_set$HeartDisease, svm_predictions)
+
+# Plot the  curve
+plot(roc_obj_svm, main="ROC Curve for SVM")
+# AUC
+cat("AUC for the SVM model: ", auc(roc_obj_svm))
+
+
+
+## Feature importance for random forests
+
+# random forest model
+rf_model <- randomForest(HeartDisease ~ ., data = train_set)
+
+# Calculate feature importance
+importance <- importance(rf_model)
+
+# Create a data frame for plotting
+importance_df <- data.frame(
+  Feature = row.names(importance),
+  Importance = importance[, "MeanDecreaseGini"]  # Use Gini importance
+)
+
+importance_df
+# Sort by importance
+importance_df <- importance_df[order(-importance_df$Importance), ]
+
+# Plot feature importance
+ggplot(importance_df, aes(x = reorder(Feature, Importance), y = Importance)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(x = "Feature", y = "Importance (Gini)", title = "Feature Importance")
+
+
+```
+
+
+## **Pre-processing and modelling**
+
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+
+### ONE HOT ENCODING
+
+
+# Apply one-hot encoding to the dataset. 
+df_encoded1 <- dummy_cols(df, remove_first_dummy = TRUE)
+
+# Remove the original categorical columns
+df_encoded1 <- df_encoded1[ , !(names(df_encoded1) %in% c("Sex", "ChestPainType", 
+      "FastingBS", "RestingECG", "ExerciseAngina", "ST_Slope","HeartDisease"))]
+
+
+# Convert HeartDisease to factor before splitting into training and testing sets
+df_encoded1$HeartDisease_1 <- as.factor(df_encoded1$HeartDisease_1)
+
+# split the data and fit the SVM model 
+index1 <- createDataPartition(df_encoded1$HeartDisease_1, p=0.8, list=FALSE)
+train_set1 <- df_encoded1[index1, ]
+test_set1 <- df_encoded1[-index1, ]
+
+
+
+# Define training control
+train_control <- trainControl(method="cv", number=5)  
+
+# Train the model with Cross-validation
+set.seed(123)
+svm_model_cv <- train(HeartDisease_1 ~ ., data=train_set1, 
+                      trControl=train_control, method="svmRadial")
+
+# Summarize the results
+print(svm_model_cv)
+
+# Make predictions on the test data
+svm_predictions <- predict(svm_model_cv, newdata = test_set1)
+
+# 
+confusionMatrix(as.factor(svm_predictions), test_set1$HeartDisease)
+
+
+
+###
+
+# logistic regression model
+log_model <- glm(HeartDisease_1 ~ ., data = train_set1, family = "binomial")
+
+# Summarize the model
+summary(log_model)
+
+# predictions on the test data
+log_probabilities <- predict(log_model, newdata = test_set1, type = "response")
+log_predictions <- ifelse(log_probabilities > 0.5, 1, 0)
+
+# confusion matrix
+confusionMatrix(as.factor(log_predictions), test_set1$HeartDisease_1)
+
+
+
+
+# random forest model
+rf_model1 <- randomForest(HeartDisease_1 ~ ., data = train_set1)
+
+# predictions on the test data
+rf_predictions1 <- predict(rf_model1, newdata = test_set1)
+
+# Evaluate 
+confusionMatrix(as.factor(rf_predictions1), as.factor(test_set1$HeartDisease_1))
+
+
+
+
+
+
+
+### ONE HOT ENCODING AND SCALING
+
+# Apply one-hot encoding to the dataset.
+df_encoded <- dummy_cols(df, remove_first_dummy = TRUE)
+
+# Remove the original categorical columns
+df_encoded <- df_encoded[ , !(names(df_encoded) %in% c("Sex", "ChestPainType", 
+                                                       "FastingBS", "RestingECG", "ExerciseAngina", "ST_Slope","HeartDisease"))]
+
+
+# Convert HeartDisease to factor before scaling
+df_encoded$HeartDisease_1 <- as.factor(df_encoded$HeartDisease_1)
+df_encoded$Sex_M <- as.factor(df_encoded$Sex_M)
+df_encoded$ChestPainType_ATA <- as.factor(df_encoded$ChestPainType_ATA)
+df_encoded$ChestPainType_NAP <- as.factor(df_encoded$ChestPainType_NAP)
+df_encoded$ChestPainType_TA <- as.factor(df_encoded$ChestPainType_TA)
+df_encoded$FastingBS_1 <- as.factor(df_encoded$FastingBS_1)
+df_encoded$RestingECG_ST <- as.factor(df_encoded$RestingECG_ST)
+df_encoded$RestingECG_Normal <- as.factor(df_encoded$RestingECG_Normal)
+df_encoded$ExerciseAngina_Y <- as.factor(df_encoded$ExerciseAngina_Y)
+df_encoded$ST_Slope_Up <- as.factor(df_encoded$ST_Slope_Up)
+df_encoded$ST_Slope_Flat <- as.factor(df_encoded$ST_Slope_Flat)
+
+# a scaler , fit it on the numerical features of the training data
+preProc <- preProcess(df_encoded[, sapply(df_encoded, is.numeric)], method = "scale")
+
+# Use the scaler to transform the numerical features of the entire dataset
+df_scaled_encoded <- predict(preProc, newdata = df_encoded)
+
+# split the data and fit models as before
+index2 <- createDataPartition(df_scaled_encoded$HeartDisease_1, p=0.8, list=FALSE)
+train_set2 <- df_scaled_encoded[index2, ]
+test_set2 <- df_scaled_encoded[-index2, ]
+
+
+
+
+# logistic regression model
+log_model2 <- glm(HeartDisease_1 ~ ., data = train_set2, family = "binomial")
+
+# Summarize the model
+summary(log_model2)
+
+##
+
+# full model
+full_model <- glm(HeartDisease_1 ~ ., family = "binomial", data = train_set2)
+
+# Perform backward selection
+reduced_model <- step(full_model, direction = "backward")
+
+
+##
+
+# predictions on the test data
+log_probabilities2 <- predict(reduced_model, newdata = test_set2, type = "response")
+log_predictions2 <- ifelse(log_probabilities2 > 0.5, 1, 0)
+
+# confusion matrix
+confusionMatrix(as.factor(log_predictions2), test_set2$HeartDisease_1)
+
+
+
+
+
+# model with Cross-validation
+svm_model_cv2 <- train(HeartDisease_1 ~ ., data=train_set2, 
+                      trControl=train_control, method="svmRadial")
+
+# results
+print(svm_model_cv2)
+
+#  predictions on the test data
+svm_predictions2 <- predict(svm_model_cv2, newdata = test_set2)
+
+# 
+confusionMatrix(as.factor(svm_predictions2), test_set2$HeartDisease_1)
+
+
+
+
+
+#  random forest model
+rf_model2 <- randomForest(HeartDisease_1 ~ ., data = train_set2)
+
+# predictions on the test data
+rf_predictions2 <- predict(rf_model2, newdata = test_set2)
+
+# Evaluate the model
+confusionMatrix(as.factor(rf_predictions2), as.factor(test_set2$HeartDisease_1))
+
+
+
+
+
+
+#### TUNING......Necassary
+
+
+
+# Define the control via a repeated k-fold cross-validation
+fitControl <- trainControl(
+  method = "repeatedcv", 
+  number = 5, 
+  repeats = 3, 
+  search = "grid"
+)
+
+#  grid for logistic regression
+
+# Lower cost values create a softer margin, higher cost values create a harder margin.
+log_grid <- expand.grid(
+  .fL = seq(0, 1, length = 10) # Penalty term
+)
+
+# Train the model
+log_fit <- train(
+  HeartDisease_1 ~ ., 
+  data = train_set2, 
+  method = "glm", 
+  family = "binomial",
+  trControl = fitControl,
+  tuneGrid = log_grid
+)
+
+# optimal parameters
+print(log_fit$bestTune)
+
+# For SVM, tune the cost and gamma parameters
+# Define grid for SVM
+svm_grid <- expand.grid(
+  .sigma = seq(0.01, 0.1, length = 10),
+  .C = c(0.5, 1, 2) 
+)
+
+# Train the model
+svm_fit <- train(
+  HeartDisease_1 ~ ., 
+  data = train_set2, 
+  method = "svmRadial", 
+  trControl = fitControl, 
+  tuneGrid = svm_grid
+)
+
+# Print the optimal parameters
+print(svm_fit$bestTune)
+
+
+
+####
+
+
+
+### Adjusting P-values
+
+
+
+# Get predicted probabilities
+predicted_probabilities <- predict(log_model, newdata = test_set1, type = "response")
+
+# Set new threshold
+threshold <- 0.55
+
+# Classify as '1' if predicted probability is greater than threshold, else '0'
+new_predictions <- ifelse(predicted_probabilities > threshold, 1, 0)
+
+confusionMatrix(as.factor(new_predictions), as.factor(test_set1$HeartDisease_1))
+
+
+###
+
+# ROC for Random Forest
+roc_log_p_new <- roc(test_set1$HeartDisease_1, new_predictions)
+
+# Plot the ROC curve
+plot(roc_log_p_new, main="ROC Curve for log model after new p value")
+#  AUC
+cat("AUC for the log model after new p value: ", auc(roc_log_p_new))
+
+
+
+
+# Random Forest
+rf_probabilities <- predict(rf_model1, newdata = test_set1, type = "prob")
+
+# Since predict gives probabilities for both classes (0 and 1), select probability of class '1'
+rf_probabilities <- rf_probabilities[,2]
+
+rf_predictions_new <- ifelse(rf_probabilities > 0.55, 1, 0)
+
+confusionMatrix(as.factor(rf_predictions_new), as.factor(test_set1$HeartDisease_1))
+
+# ROC for Random Forest
+roc_rf_new <- roc(test_set1$HeartDisease_1, rf_predictions_new)
+
+# Plot the ROC curve
+plot(roc_rf_new, main="ROC Curve for RF model after new p value")
+
+# AUC
+cat("AUC for the RF model after new p value: ", auc(roc_rf_new))
+
+
+
+
+##
+
+# Train the model with Cross-validation, with probability estimates
+
+svm_model_cv <- train(HeartDisease_1 ~ ., data=train_set1, 
+                      trControl=train_control, method="svmRadial", 
+                      preProcess = c("center", "scale"), # normalization
+                      tuneLength = 10, # hyperparameter tuning
+                      prob.model = TRUE) # train with probability estimates
+
+# summary
+print(svm_model_cv)
+
+
+
+# Predict with probability estimates
+svm_probabilities <- predict(svm_model_cv, newdata = test_set1, type="prob")
+
+# Extract probabilities for class '1'
+svm_probabilities_1 <- svm_probabilities$'1'
+
+# Adjust threshold and create new predictions
+svm_predictions_new <- ifelse(svm_probabilities_1 > 0.55, 1, 0)
+
+# Convert to factor and explicitly set the levels
+svm_predictions_new <- factor(svm_predictions_new, levels = c('0', '1'))
+
+
+
+# confusion matrix
+confusionMatrix(as.factor(svm_predictions_new), as.factor(test_set1$HeartDisease_1))
+
+
+# Convert to numeric
+svm_predictions_new_numeric <- as.numeric(as.character(svm_predictions_new))
+test_set_numeric <- as.numeric(as.character(test_set1$HeartDisease_1))
+
+# ROC for SVM
+roc_svm_new <- roc(test_set_numeric, svm_predictions_new_numeric)
+
+# Plot the ROC curve
+plot(roc_svm_new, main="ROC Curve for SVM model after new p value")
+
+# AUC
+cat("AUC for the SVM model after new p value: ", auc(roc_svm_new))
+
+
+
+```
+
+
+## **Clustering and subgrouping**
+
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+
+### Comparing model peroformance for different subgroups
+
+
+# Split the test set into male and female subsets
+test_set_male <- test_set[test_set$Sex == "M", ]
+test_set_female <- test_set[test_set$Sex == "F", ]
+
+# Get the predicted values for males and females
+predictions_male <- predictions[test_set$Sex == "M"]
+predictions_female <- predictions[test_set$Sex == "F"]
+
+# Convert both to factors with manually defined levels
+predictions_female <- factor(predictions_female, levels = c('0', '1'))
+test_set_female$HeartDisease <- factor(test_set_female$HeartDisease, levels = c('0', '1'))
+
+# confusion matrix
+confusionMatrix(predictions_female, test_set_female$HeartDisease)
+
+
+# Convert both to factors with manually defined levels
+predictions_male <- factor(predictions_male, levels = c('0', '1'))
+test_set_male$HeartDisease <- factor(test_set_male$HeartDisease, levels = c('0', '1'))
+
+# confusion matrix
+confusionMatrix(predictions_male, test_set_male$HeartDisease)
+
+
+
+
+###
+
+
+evaluate_model_for_subgroup <- function(predictions, test_set, subgroup) {
+  # Extract subgroup from test_set
+  test_set_subgroup <- test_set[test_set$Sex == subgroup, ]
+  
+  # Get the predicted values for the subgroup
+  predictions_subgroup <- predictions[test_set$Sex == subgroup]
+  
+  # Convert both to factors with manually defined levels
+  predictions_subgroup <- factor(predictions_subgroup, levels = c('0', '1'))
+  test_set_subgroup$HeartDisease <- factor(test_set_subgroup$HeartDisease, levels = c('0', '1'))
+  
+  #confusion matrix
+  cm <- confusionMatrix(predictions_subgroup, test_set_subgroup$HeartDisease)
+  
+  # ROC curve
+  roc_obj <- roc(as.numeric(as.character(test_set_subgroup$HeartDisease)), 
+                 as.numeric(as.character(predictions_subgroup)))
+  
+  # ROC and AUC
+  plot(roc_obj, main=paste("ROC Curve for", subgroup))
+  cat("AUC for the", subgroup, "model: ", auc(roc_obj))
+  
+  return(cm)
+}
+
+# Apply function to male and female subgroups
+cm_male <- evaluate_model_for_subgroup(predictions, test_set, "M")
+cm_female <- evaluate_model_for_subgroup(predictions, test_set, "F")
+
+# confusion matrices
+print(cm_male)
+print(cm_female)
+
+
+
+
+
+## Clustering
+
+
+## Kmeans
+
+dummies_model <- dummyVars(HeartDisease ~ ., data=df)
+dataset_numeric <- data.frame(predict(dummies_model, newdata = df))
+
+
+
+k <- kmeans(dataset_numeric, centers=3)  # 3 clusters
+
+
+df$cluster <- as.factor(k$cluster)
+
+
+
+# Split data into train and test sets
+set.seed(123)
+splitIndex <- createDataPartition(df$HeartDisease, p=0.7, list=FALSE)
+train_set3 <- df[splitIndex, ]
+test_set3 <- df[-splitIndex, ]
+
+
+## Hierchichal
+
+# scaled data is stored in a variable called scaled_data
+d <- daisy(scaled_data, metric = "gower")
+fit <- hclust(d)
+
+# Cut tree into k clusters
+k <- 3 
+
+clusters_hierarchical <- cutree(fit, k)
+
+# Add the new cluster assignments back to the original data
+df$cluster_hierarchical <- clusters_hierarchical
+
+
+# finalized cluster column is named 'cluster_hierarchical'
+trainIndex4 <- sample(1:nrow(df), 0.8 * nrow(df))
+train_set4 <- df[trainIndex4, ]
+test_set4 <- df[-trainIndex4, ]
+
+
+
+
+# Convert cluster_hierarchical to factor
+train_set4$cluster_hierarchical <- as.factor(train_set4$cluster_hierarchical)
+test_set4$cluster_hierarchical <- as.factor(test_set4$cluster_hierarchical)
+
+# Set number of iterations
+n_iter <- 100
+
+# Create an empty data frame to store results
+results <- data.frame(Iteration = integer(), Cluster = integer(), Model = character(), Accuracy = numeric())
+
+# Perform n_iter iterations
+for (iter in 1:n_iter) {
+  
+  # Split data into train and test sets
+  set.seed(iter) # change the seed at each iteration to get different splits
+  splitIndex <- createDataPartition(df$HeartDisease, p=0.8, list=FALSE)
+  train_set3 <- df[splitIndex, ]
+  test_set3 <- df[-splitIndex, ]
+  
+  # Fit and assess model for each cluster
+  for (i in sort(unique(df$cluster))) {
+    
+    train_set_cluster <- train_set3[train_set3$cluster == i, ]
+    test_set_cluster <- test_set3[test_set3$cluster == i, ]
+    
+    # Exclude 'cluster' variable
+    train_set_cluster$cluster <- NULL
+    test_set_cluster$cluster <- NULL
+    
+    # Fit the model
+    log_model <- glm(HeartDisease ~ ., family="binomial", data=train_set_cluster)
+    
+    # Make predictions
+    predictions <- predict(log_model, newdata=test_set_cluster, type="response")
+    
+    # Convert predictions to binary outcome
+    predictions_bin <- ifelse(predictions > 0.5, 1, 0)
+    
+    # Compute accuracy
+    accuracy <- sum(predictions_bin == test_set_cluster$HeartDisease) / nrow(test_set_cluster)
+    
+    # Add results to the data frame
+    results <- rbind(results, data.frame(Iteration = iter, Cluster = i, Model = "Logistic Regression", Accuracy = accuracy))
+    
+    # Fit the Random Forest model
+    rf_model <- randomForest(HeartDisease ~ ., data=train_set_cluster, importance=TRUE)
+    
+    # Make predictions
+    predictions_rf <- predict(rf_model, newdata=test_set_cluster)
+    
+    # Compute accuracy
+    accuracy_rf <- sum(predictions_rf == test_set_cluster$HeartDisease) / nrow(test_set_cluster)
+    
+    # Add results to the data frame
+    results <- rbind(results, data.frame(Iteration = iter, Cluster = i, Model = "Random Forest", Accuracy = accuracy_rf))
+    
+    # Fit the SVM model
+    svm_model <- svm(HeartDisease ~ ., data=train_set_cluster, kernel = "radial", cost = 10, scale = FALSE)
+    
+    # Make predictions
+    predictions_svm <- predict(svm_model, newdata=test_set_cluster)
+    
+    # Compute accuracy
+    accuracy_svm <- sum(predictions_svm == test_set_cluster$HeartDisease) / nrow(test_set_cluster)
+    
+    # Add results to the data frame
+    results <- rbind(results, data.frame(Iteration = iter, Cluster = i, Model = "SVM", Accuracy = accuracy_svm))
+  }
+}
+
+# Create a mapping for cluster names
+cluster_names <- c(
+  "1" = "Young-Healthy ",
+  "2" = "Old-Medium Risk",
+  "3" = "High-Risk"
+)
+
+# Create a color mapping for each model 
+model_colors <- c(
+  "Logistic Regression" = "darkred",
+  "Random Forest" = "darkgreen",
+  "SVM" = "gold"
+)
+
+# Calculate average accuracy and standard error for each model and cluster
+avg_results <- results %>%
+  group_by(Model, Cluster) %>%
+  summarise(Avg_Accuracy = mean(Accuracy),
+            SE_Accuracy = sd(Accuracy) / sqrt(n()),
+            .groups='keep') %>%
+  mutate(Cluster_Name = factor(cluster_names[as.character(Cluster)], levels = cluster_names))
+
+# Plot the average accuracy with error bars
+ggplot(avg_results, aes(x=Cluster_Name, y=Avg_Accuracy, fill=Model)) +
+  geom_bar(stat="identity", position=position_dodge(), aes(fill = Model)) +
+  scale_fill_manual(values = model_colors) +
+  geom_errorbar(aes(ymin=Avg_Accuracy-SE_Accuracy, ymax=Avg_Accuracy+SE_Accuracy), 
+                position=position_dodge(0.9), width=0.2) +
+  labs(x="Cluster", y="Average Accuracy", title="Average Model Performance by Cluster with Error Bars") +
+  theme_minimal()
+
+
+# Attempt to sort cluster by attributes
+
+# Calculate the mean of each numeric attribute for each cluster
+numeric_vars <- sapply(df, is.numeric)
+mean_by_cluster <- aggregate(df[numeric_vars], by=list(df$cluster), mean)
+
+# Calculate the mode of each categorical attribute for each cluster
+categorical_vars <- sapply(df, is.factor)
+mode_by_cluster <- lapply(df[categorical_vars], function(x) tapply(x, df$cluster, function(x) names(which.max(table(x)))))
+
+# Combine both data frames into one for easy viewing
+attributes_by_cluster <- cbind(mean_by_cluster, mode_by_cluster)
+
+
+# Cluster summaries
+
+# Summary statistics for Cluster 1
+print("Summary Statistics for Cluster 1")
+summary(df[df$cluster == 1,])
+
+# Summary statistics for Cluster 2
+print("Summary Statistics for Cluster 2")
+summary(df[df$cluster == 2,])
+
+# Summary statistics for Cluster 3
+print("Summary Statistics for Cluster 3")
+summary(df[df$cluster == 3,])
+
+
+```
+
+
+```{r,warning=FALSE,message=FALSE,eval=TRUE,echo=TRUE}
+# Compute and plot wss for k = 2 to k = 10
+k.max <- 10
+wss <- sapply(1:k.max, 
+              function(k){kmeans(df_encoded, k, nstart=50, iter.max = 15 )$tot.withinss})
+
+plot(1:k.max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Number of clusters K",
+     ylab="Total within-clusters sum of squares")
+
+
+```
+
+
+## **PCA**
+
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+## PCA
+
+set.seed(123)
+
+# Performing PCA
+pca_result <- prcomp(scaled_data)
+
+# Summarize the importance of components
+summary(pca_result)
+
+# Visualizing the data using the first two principal components
+pca_data <- as.data.frame(pca_result$x)
+pca_data$cluster <- df$cluster  # Add cluster information to the PCA data
+
+# Plotting the first two principal components
+
+ggplot(pca_data, aes(x=PC1, y=PC2, color=as.factor(cluster))) +
+  geom_point() +
+  labs(color="Cluster") +
+  ggtitle("PCA Plot of First Two Principal Components")
+
+
+# Scree Plot
+plot(pca_result, type="l", main="Scree Plot")
+
+# Biplot
+biplot(pca_result, main="Biplot of First Two Principal Components")
+
+##
+
+# Fit the Random Forest model on the training data
+rf_model_kmeans <- randomForest(cluster ~ ., data=train_set3, ntree=100)
+
+# Make predictions on the test data
+predictions_kmeans <- predict(rf_model_kmeans, newdata=test_set3)
+
+# Evaluate the model
+confusionMatrix(predictions_kmeans, test_set3$cluster)
+
+
+
+###
+
+
+# Repition for safety
+
+d <- daisy(scaled_data, metric = "gower")
+fit <- hclust(d)
+
+
+k <- 3 
+clusters_hierarchical <- cutree(fit, k)
+
+
+df$cluster_hierarchical <- clusters_hierarchical
+
+table(df$cluster)
+# Summary statistics for hierarchical clusters
+aggregate(.~ cluster_hierarchical, data=df, mean) # for new cluster summaries
+
+
+# Visualizing the data using the first two principal components
+pca_data <- as.data.frame(pca_result$x)
+pca_data$clusterh <- df$cluster_hierarchical  # Add cluster information to the PCA data
+
+# Plotting the first two principal components
+
+ggplot(pca_data, aes(x=PC1, y=PC2, color=as.factor(clusterh))) +
+  geom_point() +
+  labs(color="Cluster") +
+  ggtitle("PCA Plot of First Two Principal Components")
+
+
+# 
+trainIndex4 <- sample(1:nrow(df), 0.8 * nrow(df))
+train_set4 <- df[trainIndex4, ]
+test_set4 <- df[-trainIndex4, ]
+
+
+
+
+# Converting cluster_hierarchical to factor again
+train_set4$cluster_hierarchical <- as.factor(train_set4$cluster_hierarchical)
+test_set4$cluster_hierarchical <- as.factor(test_set4$cluster_hierarchical)
+
+# Build Random Forest Model
+rf_model <- randomForest(cluster_hierarchical ~ ., data=train_set4, ntree=100)
+
+# Predict on test data
+predictions <- predict(rf_model, newdata=test_set4)
+
+
+
+confusionMatrix(predictions,test_set4$cluster_hierarchical)
+
+```
+
+## **Final model tuning**
+
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+## lasso
+
+
+# For the logistic regression with stepwise selection
+library(MASS)
+
+full_model <- glm(HeartDisease_1 ~ ., data = train_set2, family = binomial)
+step_model <- stepAIC(full_model, direction = "backward")
+summary(step_model)
+
+# Make predictions on the validation set
+step_model_preds_prob <- predict(step_model, newdata = test_set2, type = "response")
+step_model_preds <- ifelse(step_model_preds_prob > 0.5, 1, 0)
+
+# Compute performance metrics
+step_model_accuracy <- sum(step_model_preds ==
+                             test_set2$HeartDisease_1) / nrow(test_set2)
+step_model_auc <- pROC::auc(pROC::roc(test_set2$HeartDisease_1, 
+                                      step_model_preds_prob))
+
+
+# For the logistic regression with lasso
+library(glmnet)
+
+x_train <- model.matrix(HeartDisease_1 ~ ., data = train_set2)[, -1]
+y_train <- train_set2$HeartDisease_1
+
+x_val <- model.matrix(HeartDisease_1 ~ ., data = test_set2)[, -1]
+y_val <- test_set2$HeartDisease_1
+
+lasso_model <- glmnet(x_train, y_train, family = "binomial", alpha = 1)
+cv.lasso <- cv.glmnet(x_train, y_train, family = "binomial", alpha = 1)
+best_lambda <- cv.lasso$lambda.min
+
+# Make predictions on the validation set
+lasso_model_preds_prob <- predict(lasso_model, newx = x_val, 
+                                  s = best_lambda, type = "response")
+lasso_model_preds <- ifelse(lasso_model_preds_prob > 0.5, 1, 0)
+
+# Compute performance metrics
+lasso_model_accuracy <- 
+  sum(lasso_model_preds == 
+        test_set2$HeartDisease_1) / nrow(test_set2)
+lasso_model_auc <- pROC::auc(pROC::roc(test_set2$HeartDisease_1, 
+                                       lasso_model_preds_prob))
+
+
+# the metrics for comparison
+cat("Stepwise selection logistic regression - Accuracy: ", 
+    step_model_accuracy, " AUC: ", step_model_auc, "\n")
+cat("Lasso logistic regression - Accuracy: ", lasso_model_accuracy, 
+    " AUC: ", lasso_model_auc, "\n")
+
+```
+
+
+## **Shiny App**
+```{r,warning=FALSE,message=FALSE,eval=FALSE,echo=TRUE}
+# Load required libraries
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(e1071)
+library(randomForest)
+library(clustMixType)
+library(shiny)
+library(shinythemes)
+library(ggplot2)
+library(cluster)
+
+
+
+# Read and preprocess the data
+df <- read.csv("heart2.csv")
+
+# Pre-process
+df$Sex <- as.factor(df$Sex)
+df$ChestPainType <- as.factor(df$ChestPainType)
+df$RestingECG <- as.factor(df$RestingECG)
+df$ExerciseAngina <- as.factor(df$ExerciseAngina)
+df$ST_Slope <- as.factor(df$ST_Slope)
+df$FastingBS = as.factor(df$FastingBS)
+df$HeartDisease = as.factor(df$HeartDisease)
+
+
+# Load pre-computed results and trained models
+rf_model <- readRDS("rf_model.rds")
+results <- readRDS("results.rds")
+train_set_cluster <- readRDS("train_set_cluster.rds")
+
+
+
+
+# User Interface
+ui <- fluidPage(
+  theme = shinytheme("cerulean"),  # Apply the Cerulean theme
+  titlePanel("Heart Disease Prediction"),
+  sidebarLayout(
+    sidebarPanel(
+      numericInput("age", "Age", 50, min = 1, max = 100),
+      selectInput("sex", "Sex", choices = c("F", "M")),
+      selectInput("chest_pain_type", "Chest Pain Type", choices = c("ASY", "ATA", "NAP", "TA")),
+      numericInput("resting_bp", "Resting Blood Pressure", 120, min = 80, max = 200),
+      numericInput("cholesterol", "Cholesterol", 200, min = 100, max = 500),
+      selectInput("fasting_bs", "Fasting Blood Sugar > 120 mg/dl", choices = c("0", "1")),
+      selectInput("resting_ecg", "Resting ECG", choices = c("LVH", "Normal", "ST")),
+      numericInput("max_hr", "Max Heart Rate Achieved", 150, min = 60, max = 200),
+      selectInput("exercise_angina", "Exercise Induced Angina", choices = c("N", "Y")),
+      numericInput("oldpeak", "Oldpeak", 1, min = 0, max = 4),
+      selectInput("st_slope", "ST Slope", choices = c("Down", "Flat", "Up"))
+    ),
+    
+    mainPanel(
+      HTML("<h3>Cluster Prediction</h3>"),
+      textOutput("cluster_description"),
+      HTML("<h3>Risk of Heart Failure</h3>"),
+      textOutput("prediction"),
+      plotOutput("densityPlot"),  
+      plotOutput("ageRiskPlot")  
+    )
+  )
+)
+
+# Define server logic 
+server <- function(input, output) {
+  
+  # Reactive values for patient's information
+  new_patient <- reactive({
+    data.frame(
+      Age = as.numeric(input$age),
+      Sex = factor(input$sex, levels = levels(train_set_cluster$Sex)),
+      ChestPainType = factor(input$chest_pain_type, 
+                             levels = levels(train_set_cluster$ChestPainType)),
+      RestingBP = as.numeric(input$resting_bp),
+      Cholesterol = as.numeric(input$cholesterol),
+      FastingBS = factor(input$fasting_bs, 
+                         levels = levels(train_set_cluster$FastingBS)),
+      RestingECG = factor(input$resting_ecg, 
+                          levels = levels(train_set_cluster$RestingECG)),
+      MaxHR = as.numeric(input$max_hr),
+      ExerciseAngina = factor(input$exercise_angina, 
+                              levels = levels(train_set_cluster$ExerciseAngina)),
+      Oldpeak = as.numeric(input$oldpeak),
+      ST_Slope = factor(input$st_slope, 
+                        levels = levels(train_set_cluster$ST_Slope))
+    )
+  })
+  
+  
+  
+  # Compute the risk for the entire dataset, so i can plot the density
+  
+  risk_all <- predict(rf_model, train_set_cluster, type = "prob")[, 2]
+  
+  # adding a reactive plot here
+  output$densityPlot <- renderPlot({
+    # use ggplot to create the density plot
+    require(ggplot2)
+    
+    # Build the data frame for plotting
+    plot_df <- data.frame(Risk = risk_all,
+                          Cluster = factor(cluster_pred, 
+                                           levels = unique(cluster_pred),
+                                           labels = paste0("Cluster ", 
+                                                           unique(cluster_pred))))
+    
+    # Plot density of Risk for each Cluster
+    ggplot(plot_df, aes(x = Risk, fill = Cluster)) +
+      geom_density(alpha = 0.5) +
+      labs(x = "Predicted Risk of Heart Disease",
+           y = "Density",
+           title = "Density plot of Predicted Risk per Cluster") +
+      theme_minimal()
+  })
+  
+  # Train the clustering model on the training data
+  gower_dist <- daisy(train_set_cluster[, -12], metric = "gower")
+  clust_model <- hclust(gower_dist)
+  cluster_pred <- cutree(clust_model, k = 3) 
+  # store cluster predictions for the training set
+  
+  # Calculate the centroids of the existing clusters
+  centroids <- aggregate(.~ cluster_pred, data = train_set_cluster[, -12], FUN = mean)
+  
+  # Predict the cluster for the new patient by finding the nearest centroid
+  output$cluster <- renderText({
+    distances <- apply(centroids[, -1], 1, function(x) sum((x - as.numeric(new_patient()))^2))
+    new_patient_cluster <- which.min(distances)
+    return(paste("The patient is predicted to belong to cluster", new_patient_cluster))
+  })
+  
+  output$cluster_description <- renderText({
+    distances <- apply(centroids[, -1], 1, function(x) sum((x - as.numeric(new_patient()))^2))
+    new_patient_cluster <- which.min(distances)
+    
+    cluster_description <- switch(new_patient_cluster,
+                                  "1" = "which represents patients who are 
+                                  typically younger with mild symptoms of chest
+                                  pain and normal resting ECG. These individuals
+                                  often have controlled cholesterol levels and
+                                  display no exercise-induced angina. 
+                                  The predicted risk of heart disease is 
+                                  generally lower for this group.",
+                                  
+                                  "2" = "which includes individuals who are 
+                                  middle-aged with moderate symptoms such as 
+                                  elevated blood pressure and occasional angina
+                                  during exercise. They may have slightly higher
+                                  cholesterol levels and present abnormalities 
+                                  in resting ECG. The risk of heart disease is 
+                                  moderate for this cluster.",
+                                  
+                                  "3" = "which is characterized by older 
+                                  patients with severe symptoms like persistent 
+                                  chest pain (e.g., ASY or ATA types), 
+                                  high resting blood pressure, and significant
+                                  exercise-induced angina. Cholesterol levels 
+                                  are often elevated, and resting ECG might 
+                                  show signs like LVH or ST changes. 
+                                  The predicted risk of heart disease is higher
+                                  for patients in this cluster."
+    )
+    
+    return(paste("The patient is predicted to belong to cluster", new_patient_cluster, "\n", cluster_description))
+  })
+  
+  
+  # Predict the risk of heart disease
+  output$prediction <- renderText({
+    prob <- predict(rf_model, new_patient(), type = "prob")
+    risk <- round(prob[2] * 100, 2)
+    return(paste("The predicted risk of heart disease is", risk, "%"))
+  })
+  
+  # 
+  risk_all <- predict(rf_model, train_set_cluster, type = "prob")[, 2]
+  
+  # New plot for Feature Value vs Risk
+  output$ageRiskPlot <- renderPlot({
+    # Build data frame for plotting
+    plot_df <- data.frame(Age = train_set_cluster$Age, 
+                          Risk = risk_all)
+    
+    # Compute the risk for the new patient
+    new_patient_risk <- predict(rf_model, new_patient(), type = "prob")[2]
+    
+    # Define error margin (initially 5% of risk) but later use model standard error
+    error_margin <- new_patient_risk * 0.05
+    
+    # Plot the risk with age
+    ggplot(plot_df, aes(x = Age, y = Risk)) +
+      geom_point(alpha=0.4) +  # plot points for all patients in training set
+      geom_point(aes(x = input$age, y = new_patient_risk), colour = "red",
+                 size = 3) +  # highlight the new patient in red
+      geom_point(aes(x = input$age, y = new_patient_risk), shape = 1, 
+                 size = error_margin * 500, stroke = 1, colour = "red",
+                 alpha = 0.5) +  
+      # Draw a circle around the new patient
+      labs(x = "Age",
+           y = "Predicted Risk of Heart Disease",
+           title = "Age vs Predicted Risk of Heart Disease") +
+      theme_bw() +
+      theme(plot.title = element_text(hjust = 0.5))  # centering the plot title
+  })
+}
+
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
