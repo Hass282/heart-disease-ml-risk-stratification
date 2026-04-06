@@ -145,4 +145,6 @@ The analysis can be reproduced using the notebooks provided in the repository.
 All preprocessing, modelling, and evaluation steps are documented to ensure transparency and reproducibility.
 
 
-
+## Files
+- 📄 Full thesis: [Thesis.pdf](./Thesis.pdf)
+- 💻 Source code: [thesis.Rmd](./thesis.Rmd)
