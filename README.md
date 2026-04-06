@@ -76,7 +76,7 @@ The ROC curve below illustrates the model’s ability to distinguish between cla
 
 ![ROC Curve](roc-plot-504.png)
 
-This indicates that the model maintains high sensitivity while minimizing false positives, making it suitable for risk prediction tasks. The distribution of residuals is approximately centered, indicating that the model captures the general structure of the data, although some variability remains.  
+This indicates that the model maintains high sensitivity while minimizing false positives, making it suitable for risk prediction tasks. Residual analysis suggests the model captures the overall structure of the data, although some variability remains.
 
 This highlights the importance of:
 - Understanding model limitations  
@@ -118,19 +118,14 @@ Additionally, clustering revealed that model performance varies across patient s
 ---
 
 ## Interactive Application
+
 An interactive web application was developed to:
 - Allow real-time risk prediction  
 - Visualize model outputs  
 - Communicate results to both technical and non-technical users
 
+[Launch App](https://hqapp2.shinyapps.io/Heartapp2/)
 
-## Why this project is interesting
-
-While predictive models achieved high performance (AUC ≈ 0.95), a key observation was that more complex models did not significantly outperform simpler ones such as logistic regression.
-
-This raises an important question: in high-stakes domains like healthcare, should interpretability be prioritized when performance gains from complex models are marginal?
-
-Additionally, clustering revealed that model performance varied across patient subgroups, suggesting that aggregate evaluation may mask clinically meaningful heterogeneity.
 
 ## Limitations
 
@@ -140,9 +135,7 @@ Additionally, clustering revealed that model performance varied across patient s
 
 
 ## Reproducibility
-
-The analysis can be reproduced using the notebooks provided in the repository.  
-All preprocessing, modelling, and evaluation steps are documented to ensure transparency and reproducibility.
+The repository includes the full R Markdown source used for the analysis, documenting preprocessing, modelling, and evaluation steps.
 
 
 ## Files
