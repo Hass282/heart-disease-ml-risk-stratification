@@ -146,6 +146,12 @@ An interactive web application was developed to:
 ## Reproducibility
 The repository includes the full R Markdown source used for the analysis, documenting preprocessing, modelling, and evaluation steps.
 
+## Future Work
+- Incorporate longitudinal data to capture temporal disease progression
+- Explore causal modelling approaches to better understand variable relationships
+- Validate models on external datasets to assess generalizability
+- Extend clustering analysis using more advanced latent variable models
+
 
 ## Files
 - 📄 Full thesis: [Thesis.pdf](./Thesis.pdf)
