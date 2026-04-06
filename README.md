@@ -99,16 +99,13 @@ This suggests that:
  --- 
 
 
-## Key Insights
+## Key Insight
 
-- **Model complexity vs interpretability trade-off:**  
-  More complex models did not significantly outperform simpler ones, suggesting that interpretable models may be preferable in clinical settings.
+While all models achieved strong predictive performance, more complex models did not significantly outperform logistic regression.
 
-- **Heterogeneity matters:**  
-  Model performance varied across patient clusters, indicating that aggregate evaluation can obscure meaningful subgroup differences.
+This suggests that in high-stakes settings such as healthcare, the marginal gains from complex models may not justify the loss in interpretability.
 
-- **Data limitations are critical:**  
-  Merging datasets introduced potential biases, highlighting the importance of careful preprocessing and critical evaluation of data sources.
+Additionally, clustering revealed that model performance varies across patient subgroups, indicating that aggregate evaluation can obscure clinically meaningful heterogeneity. Overall, this project highlights that strong predictive performance alone is insufficient; understanding model behavior across heterogeneous populations is critical for reliable real-world application.
 
 ---
 
@@ -139,7 +136,13 @@ Additionally, clustering revealed that model performance varied across patient s
 
 - Dataset size (~900 observations) may limit generalizability  
 - Merged datasets introduce potential bias  
-- Lack of longitudinal data restricts temporal insights  
+- Lack of longitudinal data restricts temporal insights
+
+
+## Reproducibility
+
+The analysis can be reproduced using the notebooks provided in the repository.  
+All preprocessing, modelling, and evaluation steps are documented to ensure transparency and reproducibility.
 
 
 
