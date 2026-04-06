@@ -18,6 +18,15 @@ This project was motivated by two key questions:
 
 ---
 
+ ## Summary
+- Built ML models (AUC ≈ 0.95) for heart disease prediction  
+- Identified patient heterogeneity via clustering  
+- Found simpler models performed comparably to complex ones  
+- Developed an interactive app for real-time prediction  
+
+
+---
+
 ## Dataset
 - Combined dataset of ~900 patient observations from multiple sources  
 - Includes demographic, clinical, and diagnostic variables  
